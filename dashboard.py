@@ -18,7 +18,7 @@ import psycopg2
 
 # <editor-fold desc="Setup Variables">
 #filePath = r"C:\Users\AngeloGuerra\OneDrive - Rieger Industrial Consultants CC\SP_Link\RIC-530 MAB BGO Licensing\Tool Upgrades\Web Dashboards"
-stylePath = r'style_v2.0.css'
+stylePath = r'style.css'
 ricLogoPath = "https://www.ricgroup.net/wp-content/uploads/sites/1122/2020/02/RIC_logo_800px.png"
 mabLogoPath = "https://markanthony.com/wp-content/uploads/mark-anthony-group-logo.png"
 # </editor-fold>
