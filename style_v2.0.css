@@ -1,0 +1,120 @@
+.pageTitle{
+    background-color: #FFFFFF;
+    justify-content: centre;
+    border-radius: 20px;
+    color:#000000;
+    font-size: 30px;
+    text-align: center;
+    width: 100%;
+    height: 100px;
+}
+
+.logo{
+    height: 95%;
+    padding: 10px 20px 10px 20px; /* top, right, bottom, left */
+}
+
+.infoCard{
+    background-color: #E8E8E8;
+    color: #5E5656;
+    font-size: 12px;
+    border: 1px solid #DCDCDC;
+    padding: 2% 2% 2% 2%;
+    border-radius: 10px;
+}
+.infoCardHeading{
+    color: #000000;
+    font-size: 18px;
+}
+.infoCardText{
+    text-indent: 10%;
+    color: #FF7A00;
+    font-size: 15px;
+}
+
+.infoCard2{
+    background-color: #E8E8E8;
+    color: #5E5656;
+    font-size: 12px;
+    border: 1px solid #8FA7A8;
+    padding: 2% 2% 2% 2%;
+    border-radius: 5px;
+}
+.infoCardHeading2{
+    color: #122B85;
+    font-size: 16px;
+}
+.infoCardText2{
+    text-indent: 10%;
+    color: #177BDE;
+    font-size: 12px;
+}
+
+/* Radio */
+input[type="radio"] + div {
+    background: #63ADD2 !important;
+    color: #FFFFFF;
+    border-radius: 20px !important;
+    padding: 8px 18px !important;
+}
+input[type="radio"] + div p {
+    font-size: 12px;
+}
+input[type="radio"][tabindex="0"] + div {
+    background: #E6FF4D !important;
+    border-radius: 20px !important;
+    color: #17455C !important;
+}
+input[type="radio"][tabindex="0"] + div p {
+    font-size: 15px;
+    color: #17455C !important;
+}
+div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 20px;
+}
+}
+div[role="radiogroup"] label > div:first-child {
+    display: none !important;
+}
+div[role="radiogroup"] label {
+    margin-right: 0px !important;
+}
+div[role="radiogroup"] {
+    gap: 20px;
+}
+
+
+/* Select Box */
+.stSelectbox>label{
+    background-color: #00B7C2;
+    position: absolute;
+    left: 0%;
+    padding: 0.31rem;
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+    z-index:1;
+    min-width: 5.5rem;
+    height: 100%;
+    text-align: center;
+    font-size: 25px;;
+}
+.stSelectbox>div>div>div>div{
+    padding: 0rem;
+    max-width: 80%;
+    font-size: 20px;
+}
+.stSelectbox>div>div>div:first-child{
+    padding: 0rem;
+    max-width: 80%;
+    margin-left: 15rem;
+    font-size: 20px;
+}
+.stSelectbox>div>div{
+    padding: 0rem;
+    font-size: 25px;
+}
+.stSelectbox>div>div:hover{
+    border: 2px solid #00B7C2;
+}
+
+
