@@ -42,3 +42,8 @@ typing_extensions==4.12.2
 tzdata==2025.1
 urllib3==2.3.0
 watchdog==6.0.0
+plotly==5.15.0
+pgeocode==0.3.0
+folium==0.14.0
+streamlit-folium==0.10.0
+numerize==0.12.0
