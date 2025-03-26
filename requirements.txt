@@ -1,11 +1,14 @@
 altair==5.5.0
 attrs==25.1.0
 blinker==1.9.0
+branca==0.8.1
 cachetools==5.5.2
 certifi==2025.1.31
 charset-normalizer==3.4.1
 click==8.1.8
 dotenv==0.9.9
+et_xmlfile==2.0.0
+folium==0.14.0
 gitdb==4.0.12
 GitPython==3.1.44
 idna==3.10
@@ -16,10 +19,14 @@ markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
 narwhals==1.27.1
+numerize==0.12
 numpy==2.2.3
+openpyxl==3.1.5
 packaging==24.2
 pandas==2.2.3
+pgeocode==0.3.0
 pillow==11.1.0
+plotly==5.15.0
 protobuf==5.29.3
 psycopg2-binary==2.9.10
 pyarrow==19.0.1
@@ -35,6 +42,7 @@ rpds-py==0.23.0
 six==1.17.0
 smmap==5.0.2
 streamlit==1.42.2
+streamlit-folium==0.10.0
 tenacity==9.0.0
 toml==0.10.2
 tornado==6.4.2
@@ -42,8 +50,3 @@ typing_extensions==4.12.2
 tzdata==2025.1
 urllib3==2.3.0
 watchdog==6.0.0
-plotly==5.15.0
-pgeocode==0.3.0
-folium==0.14.0
-streamlit-folium==0.10.0
-numerize==0.12.0
