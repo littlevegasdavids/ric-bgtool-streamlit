@@ -2,6 +2,7 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
+import numpy as np
 import os
 import sys
 import warnings
@@ -12,6 +13,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pydeck as pdk
 from numerize import numerize
+import ast
+import sqlite3
 from dotenv import load_dotenv
 import psycopg2
 # </editor-fold>
@@ -23,26 +26,35 @@ ricLogoPath = "https://www.ricgroup.net/wp-content/uploads/sites/1122/2020/02/RI
 mabLogoPath = "https://markanthony.com/wp-content/uploads/mark-anthony-group-logo.png"
 # </editor-fold>
 
-# ANGELO
-# Get scenario ID from URL parameters i.e scenarioId = 1544 when URL is http://localhost:8501/?id=1544
-query_params = st.query_params
-scenarioId = query_params.get("id")
-
-# <editor-fold desc="DB Connection">
-# ANGELO - Ensure that you have a .env file in the root directory with 
+# <editor-fold desc="DB Connection and Excel File">
 load_dotenv()
 dbConnection = psycopg2.connect(
-    host=os.getenv('DB_HOST'),
-    database=os.getenv('DB_DATABASE'),
-    user=os.getenv('DB_USER'),
-    password=os.getenv('DB_PASSWORD')
+    host=os.getenv('PGHOST'),
+    database=os.getenv('PGDATABASE'),
+    user=os.getenv('PGUSER'),
+    password=os.getenv('PGPASSWORD')
 )
 db_cur = dbConnection.cursor()
+
+query_params = st.query_params
+scenario_id_from_url = query_params.get("id") #Getting Scenario ID from URL parameters
+#scenario_id_from_url = 1618
+
+if scenario_id_from_url is None:
+    st.write("Scenario ID is not provided")
+    st.stop()
+
+solvedSc_file_path = r"../RIC-BGO-Tool/excelFiles/solved/" + scenario_id_from_url + ".xlsx"
+
+if os.path.exists(solvedSc_file_path):
+    solvedSc_excel_file = pd.ExcelFile(solvedSc_file_path)
+else:
+    st.write("File path not found: " + solvedSc_file_path)
 # </editor-fold>
 
 # <editor-fold desc="Configuration">
 warnings.filterwarnings('ignore')
-st.set_page_config(page_title="RIC BGO Dashboard", page_icon=":chart_with_upwards_trend:", layout="wide")
+st.set_page_config(page_title="BGO Dashboard", page_icon=":chart_with_upwards_trend:", layout="wide")
 # </editor-fold>
 
 # <editor-fold desc="Import CSS Styles and Create Page Title">
@@ -52,23 +64,13 @@ st.html(f'<div class= "pageTitle"><img class="logo" align ="left" src={ricLogoPa
 st.divider()
 # </editor-fold>
 
-# <editor-fold desc="Import the Excel File">
-'''
-os.chdir(filePath)
-df_CmMaster = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='CmMaster')
-df_ZipMaster = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='ZIPMaster')
-df_ZipMaster.drop_duplicates(subset='BGO Code', keep='first', inplace=True)
-df_Model = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='Model')
-df_Summary = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='Summary')
-'''
-# </editor-fold>
-
 # <editor-fold desc="Import from DB">
-df_CmMaster = pd.read_sql_query("SELECT * FROM CmMaster WHERE scenario_id = %s", dbConnection, params=(scenarioId))
-df_ZipMaster = pd.read_sql_query("SELECT * FROM ZIPMaster", dbConnection)
+#df_dbTest = pd.read_sql_query('SELECT * FROM public."Users" WHERE role_id = %s;', dbConnection, params=[1])
+df_CmMaster = pd.read_excel(solvedSc_excel_file, sheet_name='CmMaster')
+df_ZipMaster = pd.read_excel(solvedSc_excel_file, sheet_name='ZIPMaster')
 df_ZipMaster.drop_duplicates(subset='BGO Code', keep='first', inplace=True)
-df_Model = pd.read_sql_query("SELECT * FROM Model", dbConnection)
-df_Summary = pd.read_sql_query("SELECT * FROM Summary", dbConnection)
+df_Model = pd.read_excel(solvedSc_excel_file, sheet_name='Model')
+df_Summary = pd.read_excel(solvedSc_excel_file, sheet_name='Summary')
 # </editor-fold>
 
 # <editor-fold desc="Get Scenario Information">
@@ -130,52 +132,52 @@ def manufacturing_page():
     manuTypeSelect = st.selectbox("Choose Manufacturing Type: ",("GFB Production", "Packaging", "Repacking"),index=1)
     if manuTypeSelect == "GFB Production":
         #df_manuq = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='PdStQ')
-        df_manuq = pd.read_sql_query("SELECT * FROM PdStQ", dbConnection)
-        unitType = "Liters"
-        siteType = "Prod Site"
+        df_manuq = pd.read_sql_query('SELECT * FROM public."PdStQ" WHERE scenario_id = %s;', dbConnection, params=[scenario_id_from_url])
+        unitType = "litres"
+        siteType = "prod_site"
     elif manuTypeSelect == "Repacking":
         #df_manuq = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='rPkLnQ')
-        df_manuq = pd.read_sql_query("SELECT * FROM rPkLnQ", dbConnection)
-        unitType = "Cases"
-        siteType = "RePack Site"
+        df_manuq = pd.read_sql_query('SELECT * FROM public."rPkLnQ" WHERE scenario_id = %s;', dbConnection, params=[scenario_id_from_url])
+        unitType = "cases"
+        siteType = "repack_site"
     else:
         #df_manuq = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='PkLnQ')
-        df_manuq = pd.read_sql_query("SELECT * FROM PkLnQ", dbConnection)
-        unitType = "Cases"
-        siteType = "Pack Site"
-    df_manuq['Child SKU Grp'] = df_manuq['Child SKU Grp'].replace(r'^\s+|\s+$', '', regex=True)
+        df_manuq = pd.read_sql_query('SELECT * FROM public."PkLnQ" WHERE scenario_id = %s;', dbConnection, params=[scenario_id_from_url])
+        unitType = "cases"
+        siteType = "pack_site"
+    df_manuq['child_sku_group'] = df_manuq['child_sku_group'].replace(r'^\s+|\s+$', '', regex=True)
     # </editor-fold>
     # <editor-fold desc="Create Filters and Apply to Data">
     selCol1, selCol2, selCol3 = st.columns(3)
     with selCol1:
-        period = st.multiselect("Select Period: ", df_manuq["Period"].unique())
+        period = st.multiselect("Select Period: ", df_manuq["period"].unique())
     with selCol2:
-        parentSkuGroup = st.multiselect("Select Parent SKU Group: ", df_manuq["Parent SKU Grp"].unique())
+        parentSkuGroup = st.multiselect("Select Parent SKU Group: ", df_manuq["parent_sku_group"].unique())
     with selCol3:
-        childSkuGroup = st.multiselect("Select Child SKU Group: ", df_manuq["Child SKU Grp"].unique())
+        childSkuGroup = st.multiselect("Select Child SKU Group: ", df_manuq["child_sku_group"].unique())
 
     # Apply Filters to data
     if not period and not childSkuGroup and not parentSkuGroup:
         filtered_df_manuq = df_manuq
     elif not childSkuGroup and not parentSkuGroup:
-        filtered_df_manuq = df_manuq[df_manuq["Period"].isin(period)]
+        filtered_df_manuq = df_manuq[df_manuq["period"].isin(period)]
     elif not period and not parentSkuGroup:
-        filtered_df_manuq = df_manuq[df_manuq["Child SKU Grp"].isin(childSkuGroup)]
+        filtered_df_manuq = df_manuq[df_manuq["child_sku_group"].isin(childSkuGroup)]
     elif not childSkuGroup and not period:
-        filtered_df_manuq = df_manuq[df_manuq["Parent SKU Grp"].isin(parentSkuGroup)]
+        filtered_df_manuq = df_manuq[df_manuq["parent_sku_group"].isin(parentSkuGroup)]
     elif not childSkuGroup:
-        filtered_df_manuq = df_manuq[df_manuq["Period"].isin(period) & df_manuq["Parent SKU Grp"].isin(parentSkuGroup)]
+        filtered_df_manuq = df_manuq[df_manuq["period"].isin(period) & df_manuq["parent_sku_group"].isin(parentSkuGroup)]
     elif not parentSkuGroup:
-        filtered_df_manuq = df_manuq[df_manuq["Period"].isin(period) & df_manuq["Child SKU Grp"].isin(childSkuGroup)]
+        filtered_df_manuq = df_manuq[df_manuq["period"].isin(period) & df_manuq["child_sku_group"].isin(childSkuGroup)]
     elif not period:
-        filtered_df_manuq = df_manuq[df_manuq["Parent SKU Grp"].isin(parentSkuGroup) & df_manuq["Child SKU Grp"].isin(childSkuGroup)]
+        filtered_df_manuq = df_manuq[df_manuq["parent_sku_group"].isin(parentSkuGroup) & df_manuq["child_sku_group"].isin(childSkuGroup)]
     else:
-        filtered_df_manuq = df_manuq[df_manuq["Period"].isin(period) & df_manuq["Child SKU Grp"].isin(childSkuGroup) & df_manuq["Parent SKU Grp"].isin(parentSkuGroup)]
+        filtered_df_manuq = df_manuq[df_manuq["period"].isin(period) & df_manuq["child_sku_group"].isin(childSkuGroup) & df_manuq["parent_sku_group"].isin(parentSkuGroup)]
 
     category_df_manuq = filtered_df_manuq.groupby(by=[siteType], as_index=False)[unitType].sum()
-    category_df_manuq2 = filtered_df_manuq.groupby(by=["Period"], as_index=False)[unitType].sum()
-    category_df_manuq3 = filtered_df_manuq.groupby(by=["Child SKU Grp"], as_index=False)[unitType].sum()
-    category_df_manuq4 = filtered_df_manuq.pivot_table(index='SKU Group', columns=siteType, values=unitType, aggfunc='sum')
+    category_df_manuq2 = filtered_df_manuq.groupby(by=["period"], as_index=False)[unitType].sum()
+    category_df_manuq3 = filtered_df_manuq.groupby(by=["child_sku_group"], as_index=False)[unitType].sum()
+    category_df_manuq4 = filtered_df_manuq.pivot_table(index='sku_group', columns=siteType, values=unitType, aggfunc='sum')
     # </editor-fold>
     # <editor-fold desc="Display Graphs">
     col1, col2 = st.columns(2)
@@ -185,13 +187,13 @@ def manufacturing_page():
         st.plotly_chart(fig,use_container_width=True)
     with col2:
         st.subheader("Quantity per Period")
-        fig = px.line(category_df_manuq2, x="Period", y=unitType, template="seaborn",height=250)
+        fig = px.line(category_df_manuq2, x="period", y=unitType, template="seaborn",height=250)
         st.plotly_chart(fig,use_container_width=True)
 
     col5, col6 = st.columns((2,4),gap='small')
     with col5:
         st.subheader("Quantity by Container Size")
-        fig = px.line_polar(category_df_manuq3, r=unitType, theta="Child SKU Grp", line_close=True)
+        fig = px.line_polar(category_df_manuq3, r=unitType, theta="child_sku_group", line_close=True)
         st.plotly_chart(fig, use_container_width=True)
     with col6:
         st.subheader("Quantity by Site and SKU")
@@ -201,16 +203,16 @@ def manufacturing_page():
 def distribution_page():
     # <editor-fold desc="Select Distribution Type and Import Relevant Data">
     #df_FgCm = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='FG_Cm')
-    df_FgCm = pd.read_sql_query("SELECT * FROM FG_Cm", dbConnection)
+    df_FgCm = pd.read_sql_query('SELECT * FROM public."FG_Cm" WHERE scenario_id = %s;', dbConnection, params=[scenario_id_from_url])
     # </editor-fold>
     # <editor-fold desc="Match ZIP Codes with Latitude and Longitude">
     nomi = pgeocode.Nominatim('US')
-    df_FgCm = pd.merge(df_FgCm, df_ZipMaster, left_on='FG Warehouse', right_on='BGO Code')
+    df_FgCm = pd.merge(df_FgCm, df_ZipMaster, left_on='fg_warehouse', right_on='BGO Code')
     df_FgCm.rename(columns={'ZIP': 'FromZIP'}, inplace=True)
     df_FgCm.drop(['BGO Code'], axis=1, inplace=True)
     df_FgCm['FromZIP'] = df_FgCm['FromZIP'].apply(lambda x: x.zfill(5))
 
-    df_FgCm = pd.merge(df_FgCm, df_ZipMaster, left_on='Distributor', right_on='BGO Code')
+    df_FgCm = pd.merge(df_FgCm, df_ZipMaster, left_on='distributor', right_on='BGO Code')
     df_FgCm.rename(columns={'ZIP': 'ToZIP'}, inplace=True)
     df_FgCm['ToZIP'] = df_FgCm['ToZIP'].astype(str)
     df_FgCm.drop(['BGO Code'], axis=1, inplace=True)
@@ -225,27 +227,27 @@ def distribution_page():
     selCol1, selCol2 = st.columns(2)
 
     with selCol1:
-        period = st.multiselect("Select Period: ", df_FgCm["Period"].unique())
+        period = st.multiselect("Select Period: ", df_FgCm["period"].unique())
     with selCol2:
-        skuGrp = st.multiselect("Select SKU's: ", df_FgCm["SKU Group"].unique())
+        skuGrp = st.multiselect("Select SKU's: ", df_FgCm["sku_group"].unique())
     # Apply Filters to data
     if not period and not skuGrp:
         filtered_df_FgCm = df_FgCm
     elif not skuGrp:
-        filtered_df_FgCm = df_FgCm[df_FgCm["Period"].isin(period)]
+        filtered_df_FgCm = df_FgCm[df_FgCm["period"].isin(period)]
     elif not period:
-        filtered_df_FgCm = df_FgCm[df_FgCm["SKU Group"].isin(skuGrp)]
+        filtered_df_FgCm = df_FgCm[df_FgCm["sku_group"].isin(skuGrp)]
     else:
-        filtered_df_FgCm = df_FgCm[df_FgCm["Period"].isin(period) & df_FgCm["SKU Group"].isin(skuGrp)]
+        filtered_df_FgCm = df_FgCm[df_FgCm["period"].isin(period) & df_FgCm["sku_group"].isin(skuGrp)]
 
-    summary_df_FgCm = filtered_df_FgCm.groupby(['FG Warehouse','Distributor'])['Cases'].sum().reset_index()
-    summary_df_FgCm = summary_df_FgCm.merge(filtered_df_FgCm[['FG Warehouse','FromLat','FromLon']].drop_duplicates(),on='FG Warehouse', how='left')
-    summary_df_FgCm = summary_df_FgCm.merge(filtered_df_FgCm[['Distributor','ToLat','ToLon']].drop_duplicates(),on='Distributor', how='left')
-    summary_df_FgCm['Color'] = 180-(80*(summary_df_FgCm['Cases']/summary_df_FgCm['Cases'].max()))
+    summary_df_FgCm = filtered_df_FgCm.groupby(['fg_warehouse','distributor'])['cases'].sum().reset_index()
+    summary_df_FgCm = summary_df_FgCm.merge(filtered_df_FgCm[['fg_warehouse','FromLat','FromLon']].drop_duplicates(),on='fg_warehouse', how='left')
+    summary_df_FgCm = summary_df_FgCm.merge(filtered_df_FgCm[['distributor','ToLat','ToLon']].drop_duplicates(),on='distributor', how='left')
+    summary_df_FgCm['Color'] = 180-(80*(summary_df_FgCm['cases']/summary_df_FgCm['cases'].max()))
 
-    qtyShipped = filtered_df_FgCm['Cases'].sum()
-    totalTrkLoads = filtered_df_FgCm['Truck Loads'].sum()
-    totalMilesTraveled = filtered_df_FgCm['Route Miles'].sum()
+    qtyShipped = filtered_df_FgCm['cases'].sum()
+    totalTrkLoads = filtered_df_FgCm['truck_loads'].sum()
+    totalMilesTraveled = filtered_df_FgCm['route_miles'].sum()
     avgMilesPerLoad = totalMilesTraveled / totalTrkLoads
     # </editor-fold>
     # <editor-fold desc="Display Info Cards">
@@ -262,7 +264,7 @@ def distribution_page():
         pdk.Deck(
             map_style=None,
             initial_view_state=pdk.ViewState(latitude=40,longitude=-117,zoom=2.4,pitch=30,),
-            tooltip = {"text": "From Site: {FG Warehouse}\nDistributor: {Distributor}\nCases: {Cases}\nColor: {Color}"},
+            tooltip = {"text": "From Site: {fg_warehouse}\nDistributor: {distributor}\nCases: {cases}\nColor: {Color}"},
             layers=[
                 pdk.Layer(
                     "LineLayer",
