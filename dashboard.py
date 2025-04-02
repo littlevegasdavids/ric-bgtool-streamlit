@@ -201,6 +201,11 @@ def manufacturing_page():
     # </editor-fold>
 
 def distribution_page():
+    if "selected_period" not in st.session_state:
+        st.session_state.selected_period = []
+    if "selected_sku_group" not in st.session_state:
+        st.session_state.selected_sku_group = []
+
     # <editor-fold desc="Select Distribution Type and Import Relevant Data">
     #df_FgCm = pd.read_excel("MABOutputFile_Template.xlsx", sheet_name='FG_Cm')
     df_FgCm = pd.read_sql_query('SELECT * FROM public."FG_Cm" WHERE scenario_id = %s;', dbConnection, params=[scenario_id_from_url])
@@ -227,9 +232,11 @@ def distribution_page():
     selCol1, selCol2 = st.columns(2)
 
     with selCol1:
-        period = st.multiselect("Select Period: ", df_FgCm["period"].unique())
+        period = st.multiselect("Select Period: ", df_FgCm["period"].unique(), default=st.session_state.selected_period, key="selected_period")
+
     with selCol2:
-        skuGrp = st.multiselect("Select SKU's: ", df_FgCm["sku_group"].unique())
+        skuGrp = st.multiselect("Select SKU's: ", df_FgCm["sku_group"].unique(), default=st.session_state.selected_sku_group, key="selected_sku_group")
+
     # Apply Filters to data
     if not period and not skuGrp:
         filtered_df_FgCm = df_FgCm
