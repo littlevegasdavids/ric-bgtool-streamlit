@@ -3504,20 +3504,20 @@ if __name__ == '__main__':
         # region Tag Reno - DB Table: Model (NEW ANGELO)
         obj_soln.to_excel(writer, sheet_name='Model', index=True, merge_cells=False)
         sheetDim['Model'] = (len(obj_soln) + 1, obj_soln.index.nlevels + len(obj_soln.columns) - 1)
-        index = 0
+        '''index = 0
         sql = 'INSERT INTO public."Model"(scenario_id, h1, h2) VALUES(%s, %s, %s)'
         for row in obj_soln.index:
             h1 = row
             h2 = obj_soln.loc[row, 'H2']  # Access the corresponding value in the DataFrame for h2
             index += 1
             db_cur.execute(sql, (scenarioId, h1, h2))
-        db_conn.commit()
+        db_conn.commit()'''
         # endregion
 
         # region Tag Reno - DB Table: Summary (NEW ANGELO)
         Summary_soln.unstack(level=-1).droplevel(0, axis=1).reindex(columns=period_lstExt).to_excel(writer,sheet_name='Summary',index=True,merge_cells=False)
         sheetDim['Summary'] = (len(Summary_soln) + 1, Summary_soln.index.nlevels + len(Summary_soln.columns) - 1)
-        index = 0
+        '''index = 0
         sql = 'INSERT INTO public."Summary"(scenario_id, h1, h2, h3, h4, h5, uom, total, report_total) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
         for row in Summary_soln.index:
             h1 = Summary_soln.loc[row, 'H1']
@@ -3530,7 +3530,7 @@ if __name__ == '__main__':
             report_total = Summary_soln.loc[row, 'Report Total']
             index += 1
             db_cur.execute(sql, (scenarioId, h1, h2, h3, h4, h5, uom, total, report_total))
-        db_conn.commit()
+        db_conn.commit()'''
         # endregion
 
         # region Tag Reno - DB Table: PdS_Pd
