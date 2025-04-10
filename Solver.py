@@ -3520,14 +3520,14 @@ if __name__ == '__main__':
         index = 0
         sql = 'INSERT INTO public."Summary"(scenario_id, h1, h2, h3, h4, h5, uom, total, report_total) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
         for row in Summary_soln.index:
-            h1 = row[1]
-            h2 = row[2]
-            h3 = row[3]
-            h4 = row[4]
-            h5 = row[5]
-            uom = row[6]
-            total = PdS_Pd_soln['Total'][index]
-            report_total = PdS_Pd_soln['Report Total'][index]
+            h1 = Summary_soln.loc[row, 'H1']
+            h2 = Summary_soln.loc[row, 'H2']
+            h3 = Summary_soln.loc[row, 'H3']
+            h4 = Summary_soln.loc[row, 'H4']
+            h5 = Summary_soln.loc[row, 'H5']
+            uom = Summary_soln.loc[row, 'UOM']
+            total = Summary_soln.loc[row, 'Total']
+            report_total = Summary_soln.loc[row, 'Report Total']
             index += 1
             db_cur.execute(sql, (scenarioId, h1, h2, h3, h4, h5, uom, total, report_total))
         db_conn.commit()
