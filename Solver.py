@@ -3501,10 +3501,37 @@ if __name__ == '__main__':
         #Tag Reno - Leave print here
         print('*** Writing output file ***')
 
-
+        # region Tag Reno - DB Table: Model (NEW ANGELO)
         obj_soln.to_excel(writer, sheet_name='Model', index=True, merge_cells=False)
+        sheetDim['Model'] = (len(obj_soln) + 1, obj_soln.index.nlevels + len(obj_soln.columns) - 1)
+        index = 0
+        sql = 'INSERT INTO public."Model"(scenario_id, h1, h2) VALUES(%s, %s, %s)'
+        for row in obj_soln.index:
+            h1 = row[0]
+            h2 = row[1]
+            index += 1
+            db_cur.execute(sql, (scenarioId, h1, h2))
+        db_conn.commit()
+        # endregion
 
-        Summary_soln.unstack(level=-1).droplevel(0, axis=1).reindex(columns=period_lstExt).to_excel(writer, sheet_name='Summary', index=True, merge_cells=False)
+        # region Tag Reno - DB Table: Summary (NEW ANGELO)
+        Summary_soln.unstack(level=-1).droplevel(0, axis=1).reindex(columns=period_lstExt).to_excel(writer,sheet_name='Summary',index=True,merge_cells=False)
+        sheetDim['Summary'] = (len(Summary_soln) + 1, Summary_soln.index.nlevels + len(Summary_soln.columns) - 1)
+        index = 0
+        sql = 'INSERT INTO public."Summary"(scenario_id, h1, h2, h3, h4, h5, uom, total, report_total) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        for row in Summary_soln.index:
+            h1 = row[1]
+            h2 = row[2]
+            h3 = row[3]
+            h4 = row[4]
+            h5 = row[5]
+            uom = row[6]
+            total = PdS_Pd_soln['Total'][index]
+            report_total = PdS_Pd_soln['Report Total'][index]
+            index += 1
+            db_cur.execute(sql, (scenarioId, h1, h2, h3, h4, h5, uom, total, report_total))
+        db_conn.commit()
+        # endregion
 
         # region Tag Reno - DB Table: PdS_Pd
         PdS_Pd_soln.to_excel(writer, sheet_name='PdS_Pd', index=True, merge_cells=False)
