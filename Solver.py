@@ -3526,8 +3526,8 @@ if __name__ == '__main__':
             h4 = row[4]
             h5 = row[5]
             uom = row[6]
-            total = PdS_Pd_soln['Total'][index]
-            report_total = PdS_Pd_soln['Report Total'][index]
+            total = Summary_soln['Total'][index]
+            report_total = Summary_soln['Report Total'][index]
             index += 1
             db_cur.execute(sql, (scenarioId, h1, h2, h3, h4, h5, uom, total, report_total))
         db_conn.commit()
