@@ -3507,8 +3507,8 @@ if __name__ == '__main__':
         index = 0
         sql = 'INSERT INTO public."Model"(scenario_id, h1, h2) VALUES(%s, %s, %s)'
         for row in obj_soln.index:
-            h1 = row[0]
-            h2 = row[1]
+            h1 = row
+            h2 = obj_soln.loc[row, 'H2']  # Access the corresponding value in the DataFrame for h2
             index += 1
             db_cur.execute(sql, (scenarioId, h1, h2))
         db_conn.commit()
