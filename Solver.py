@@ -3515,7 +3515,10 @@ if __name__ == '__main__':
         # endregion
 
         # region Tag Reno - DB Table: Summary (NEW ANGELO)
-        Summary_soln.unstack(level=-1).droplevel(0, axis=1).reindex(columns=period_lstExt).to_excel(writer,sheet_name='Summary',index=True,merge_cells=False)
+        print(Summary_soln)
+        print(Summary_soln.index)
+        Summary_soln.unstack(level=-1).droplevel(0, axis=1).reindex(columns=period_lstExt)
+        Summary_soln.to_excel(writer,sheet_name='Summary',index=True,merge_cells=False)
         sheetDim['Summary'] = (len(Summary_soln) + 1, Summary_soln.index.nlevels + len(Summary_soln.columns) - 1)
         index = 0
         print(Summary_soln)
@@ -3523,6 +3526,8 @@ if __name__ == '__main__':
         #sql = 'INSERT INTO public."Summary"(scenario_id, h1, h2, h3, h4, h5, uom, total, report_total) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
         for row in Summary_soln.index:
             print(row)
+            #if Summary_soln.loc[row, 'Period'] == 'Total' or Summary_soln.loc[row, 'Period'] == 'Report Total':
+                #print(Summary_soln.loc[row, 'Period'])
             '''h1 = Summary_soln.loc[row, 'H1']
             h2 = Summary_soln.loc[row, 'H2']
             h3 = Summary_soln.loc[row, 'H3']
