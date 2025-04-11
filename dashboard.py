@@ -387,7 +387,7 @@ def comparison_page():
                     comparisonDF[chosen_scenario_id]['Total Packed (M, Cases)'] = chosen_scenario_summary[(chosen_scenario_summary['H1'] == "Volume") &(chosen_scenario_summary['H2'] == "Quantity") &(chosen_scenario_summary['H3'] == "Pk")]["Report Total"].sum()
                     comparisonDF[chosen_scenario_id]['Internal cs Co-Man (Pack)'] = "x/y"
                     comparisonDF[chosen_scenario_id]['Outbound Miles / Shipment'] = ""
-                    comparisonDF[chosen_scenario_id]['Total COGS (M)'] = 1
+                    comparisonDF[chosen_scenario_id]['Total COGS (M)'] = 12222222222222222
                     comparisonDF[chosen_scenario_id]['Total Indirect COGS (M)'] = 1
                     comparisonDF[chosen_scenario_id]['Total COGS / Cs'] = 1
                     comparisonDF[chosen_scenario_id]['Total Direct COGS / Cs'] = 1
