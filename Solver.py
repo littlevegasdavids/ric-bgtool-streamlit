@@ -3504,34 +3504,45 @@ if __name__ == '__main__':
         # region Tag Reno - DB Table: Model (NEW ANGELO)
         obj_soln.to_excel(writer, sheet_name='Model', index=True, merge_cells=False)
         sheetDim['Model'] = (len(obj_soln) + 1, obj_soln.index.nlevels + len(obj_soln.columns) - 1)
-        '''index = 0
+        index = 0
         sql = 'INSERT INTO public."Model"(scenario_id, h1, h2) VALUES(%s, %s, %s)'
         for row in obj_soln.index:
             h1 = row
             h2 = obj_soln.loc[row, 'H2']  # Access the corresponding value in the DataFrame for h2
             index += 1
             db_cur.execute(sql, (scenarioId, h1, h2))
-        db_conn.commit()'''
+        db_conn.commit()
         # endregion
 
         # region Tag Reno - DB Table: Summary (NEW ANGELO)
         Summary_soln.unstack(level=-1).droplevel(0, axis=1).reindex(columns=period_lstExt).to_excel(writer,sheet_name='Summary',index=True,merge_cells=False)
         sheetDim['Summary'] = (len(Summary_soln) + 1, Summary_soln.index.nlevels + len(Summary_soln.columns) - 1)
-        index = 0
-        #sql = 'INSERT INTO public."Summary"(scenario_id, h1, h2, h3, h4, h5, uom, total, report_total) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-        for row in Summary_soln.index:
-            if Summary_soln.loc[row, 'Period'] == 'Total':
-                h1 = Summary_soln.loc[row, 'H1']
-                h2 = Summary_soln.loc[row, 'H2']
-                h3 = Summary_soln.loc[row, 'H3']
-                h4 = Summary_soln.loc[row, 'H4']
-                h5 = Summary_soln.loc[row, 'H5']
-                uom = Summary_soln.loc[row, 'UOM']
-                total = Summary_soln.loc[row, 'Period'][index]
-                report_total = Summary_soln.loc[(slice(None), h1, h2, h3, h4, h5, uom, 'Report Total')][index]
-                index += 1
-                #db_cur.execute(sql, (scenarioId, h1, h2, h3, h4, h5, uom, total, report_total))
-        #db_conn.commit()
+        sql = 'INSERT INTO public."Summary"(scenario_id, h1, h2, h3, h4, h5, uom, total, report_total) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+
+        for row in Summary_soln.itertuples():
+            total_type = row.Index[7]
+
+            if(total_type != 'Total' and total_type != 'Report Total'):
+                continue
+            
+            h1 = row.Index[1]
+            h2 = row.Index[2]
+            h3 = row.Index[3]
+            h4 = row.Index[4]
+            h5 = row.Index[5]
+            uom = row.Index[6]
+            total = None
+            report_total = None
+
+            if(total_type == 'Total'):
+                total = row[1]
+                report_total = None  
+            elif(total_type == 'Report Total'):
+                report_total = row[1]
+                total = None
+
+            db_cur.execute(sql, (scenarioId, h1, h2, h3, h4, h5, uom, total, report_total))
+        db_conn.commit()
         # endregion
 
         # region Tag Reno - DB Table: PdS_Pd
