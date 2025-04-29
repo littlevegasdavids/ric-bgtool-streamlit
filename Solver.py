@@ -2725,7 +2725,7 @@ if __name__ == '__main__':
             for cm in CmDem_data:
                 for sku in CmDem_data[cm]:
                     qty += CmDem_data[cm][sku][period]
-        dictVolRequired['Required', 'Total', 'Total', period] = qty
+        dictVolRequired['Required', 'Total', 'Total', period] = qty * scalingVolume
 
 
         dictKPILoads['FG_Cm', 'Total Miles', period] = 0
@@ -2823,6 +2823,8 @@ if __name__ == '__main__':
                     dictCstHandling[storeType, s2, 'Total', period] += cst2 * val
                 if dunnage == 'Y' and mi > dunnage_dist:
                     dictCstDunnage[route, s1, s2, period] += dunnage_cost * scalingCost * val / (Unit_data['Qty_Per_Load'][sku] * scalingVolume)
+                if route == 'FG_Cm':
+                    dictVolDelivered['Delivered', 'Total', 'Total', period] += val
                 skuGrp = sku if modelGrpLevel == 'Yes' else Unit_data['SKU_Group'][sku]
                 parent = Unit_data['Parent_Group'][sku]
                 child = Unit_data['Child_Group'][sku]
