@@ -78,11 +78,11 @@ ScCode = df_Model.loc[df_Model['H1'] == 'Scenario Code', 'H2'].values[0]
 ScDescription = df_Model.loc[df_Model['H1'] == 'Scenario Description', 'H2'].values[0]
 ScGrp = "Group-Level Run" if df_Model.loc[df_Model['H1'] == 'Run Model on SKU Grp Level', 'H2'].values[0] == "Yes" else "SKU Level Run"
 
-exPd = df_Model.loc[df_Model['H1'] == 'Excluded Sites: Pd Site', 'H2'].values[0]
-exPk = df_Model.loc[df_Model['H1'] == 'Excluded Sites: Pk Site', 'H2'].values[0]
-exRpk = df_Model.loc[df_Model['H1'] == 'Excluded Sites: rPk Site', 'H2'].values[0]
-exWip = df_Model.loc[df_Model['H1'] == 'Excluded Sites: WIP Site', 'H2'].values[0]
-exFg = df_Model.loc[df_Model['H1'] == 'Excluded Sites: FG Site', 'H2'].values[0]
+exPd = eval(df_Model.loc[df_Model['H1'] == 'Excluded Sites: Pd Site', 'H2'].values[0])
+exPk = eval(df_Model.loc[df_Model['H1'] == 'Excluded Sites: Pk Site', 'H2'].values[0])
+exRpk = eval(df_Model.loc[df_Model['H1'] == 'Excluded Sites: rPk Site', 'H2'].values[0])
+exWip = eval(df_Model.loc[df_Model['H1'] == 'Excluded Sites: WIP Site', 'H2'].values[0])
+exFg = eval(df_Model.loc[df_Model['H1'] == 'Excluded Sites: FG Site', 'H2'].values[0])
 # </editor-fold>
 
 def main_page():
@@ -92,13 +92,17 @@ def main_page():
     colDescription.html(f'<div class="infoCard"><p class="infoCardHeading">Scenario Description</p><p class="infoCardText">{ScDescription}</p></div>')
     colGrp.html(f'<div class="infoCard"><p class="infoCardHeading">Run Type</p><p class="infoCardText">{ScGrp}</p></div>')
     # </editor-fold>
-    # <editor-fold desc="Show Excl. Sites on Cards">
-    colExPd, colExPk, colExRpk, colExWip, colExFg = st.columns(5)
-    colExPd.html(f'<div class="infoCard2"><p class="infoCardHeading2">Excl. Pk Sites</p><p class="infoCardText2">{exPd}</p></div>')
-    colExPk.html(f'<div class="infoCard2"><p class="infoCardHeading2">Excl. Pk Sites</p><p class="infoCardText2">{exPk}</p></div>')
-    colExRpk.html(f'<div class="infoCard2"><p class="infoCardHeading2">Excl. rPk Sites</p><p class="infoCardText2">{exRpk}</p></div>')
-    colExWip.html(f'<div class="infoCard2"><p class="infoCardHeading2">Excl. WIP Sites</p><p class="infoCardText2">{exWip}</p></div>')
-    colExFg.html(f'<div class="infoCard2"><p class="infoCardHeading2">Excl. FG Sites</p><p class="infoCardText2">{exFg}</p></div>')
+    # <editor-fold desc="Show Excl. Sites in a Table">
+    exclSiteData = {
+        "Pd": exPd,
+        "Pk": exPk,
+        "rPk": exRpk,
+        "WIP": exWip,
+        "FG": exFg
+    }
+    exclSiteDf = pd.DataFrame(dict([(key, pd.Series(value)) for key, value in exclSiteData.items()]))
+    st.subheader("Excluded Sites:")
+    st.table(exclSiteDf)
     # </editor-fold>
     # <editor-fold desc="Get Summary Stats/KPIs">
     df_Summary_Pens = df_Summary.loc[(df_Summary['H1'] == 'Cost') & (df_Summary['H3'] == 'Pk') & (df_Summary['H5'] == 'Total')]
@@ -288,11 +292,165 @@ def distribution_page():
 
     # </editor-fold>
 
+def comparison_page():
+    scenario_list = pd.read_sql_query('SELECT id, scenario_code FROM public."Scenarios" WHERE scenario_status = 4;', dbConnection)
+    scenario_list['Concatenated SC ID'] = scenario_list['id'].astype(str) + " - " + scenario_list['scenario_code'].astype(str)
+    scenario_list = scenario_list.sort_values(by="id", ascending=False)
+
+    comparisonDF = {'Headers': ['Scenario Code:',
+                                'Volume',
+                                'Periods',
+                                'Min Batch?',
+                                'Min Load?',
+                                '',
+                                'Req. Sales (M, Cases)',
+                                'Actual Sales (M, Cases)',
+                                'Total Packed (M, Cases)',
+                                'Internal cs Co-Man (Pack)',
+                                'Outbound Miles / Shipment',
+                                '',
+                                'Total COGS (M)',
+                                'Total Indirect COGS (M)',
+                                'Total COGS / Cs',
+                                'Total Direct COGS / Cs',
+                                'Total Indirect COGS / Cs',
+                                '',
+                                'Total Direct COGS (Var, M)',
+                                'Manufacturing (Pd)',
+                                'Manufacturing (Pk)',
+                                'Manufacturing (rPk)',
+                                'Co-Man Penalties (Pd)',
+                                'Co-Man Penalties (Pk)',
+                                'Co-Man Penalties (rPk)',
+                                'Freight (SUBS Total)',
+                                'Freight (Pk_Wip)',
+                                'Freight (WIP_rPk)',
+                                '',
+                                'Total Direct COGS (Fxd, M)',
+                                'Fixed Costs',
+                                'Other Non Fixed Adj',
+                                '',
+                                'Total Indirect COGS (Var, M)',
+                                'Handling',
+                                'Storage',
+                                'Intercompany Freight (Inter GFB, VP, NVP - TOTAL)',
+                                'Freight (Pd_Pk)',
+                                'Freight (Pk_FG)',
+                                'Freight (rPk_FG)',
+                                'Outbound Freight (VP, NVP - TOTAL)',
+                                'Freight (FG_Cm)',
+                                'Loads_SF (FG_Cm)',
+                                'Dunnage',
+                                'Other',
+                                '',
+                                'Total Indirect COGS (Fxd, M)',
+                                'Fixed Storage & Handling',
+                                'Other fixed',
+                                'Other Non Fixed Adj',
+                                '',
+                                '',
+                                'Pk Qty (M Cases/Yr)',
+                                '',
+                                'Avg. Pd Utilization (Hrs)',
+                                'Avg. Pk Utilization (Hrs)',
+                                'Avg. rPk Utilization (Hrs)',
+                                '',
+                                'Avg. Storage Utilization (WIP and/or FG, Cs)',
+                                'Max Storage Utilization (WIP and/or FG, Cs)',
+                                '',
+                                ]}
+
+    if "chosen_comparison_scenarios" not in st.session_state:
+        st.session_state['chosen_comparison_scenarios'] = []
+
+    # <editor-fold desc="Scenario Addition Form">
+    with st.form("add_sc_form"):
+        st.write("Add Scenarios to Comparison")
+        chosen_scenario = st.selectbox("Choose Scenario:", options=scenario_list['Concatenated SC ID'])
+
+        # Create Submit button and then create the logic
+        submitted = st.form_submit_button("Add to Comparison")
+        if submitted:
+            chosen_scenario_id = int(scenario_list.loc[scenario_list['Concatenated SC ID'] == chosen_scenario, 'id'].iloc[0])
+            if chosen_scenario_id not in st.session_state['chosen_comparison_scenarios']:
+                chosen_scenario_summary = pd.read_sql_query('SELECT * FROM public."Summary" WHERE scenario_id = %s;', dbConnection, params=[chosen_scenario_id])
+                chosen_scenario_model = pd.read_sql_query('SELECT * FROM public."Model" WHERE scenario_id = %s;', dbConnection, params=[chosen_scenario_id])
+                if not chosen_scenario_summary.empty:
+                    # <editor-fold desc="Get all Comparison info and add it to the Table">
+                    comparisonDF[chosen_scenario_id]['Scenario Code:'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Scenario Code', 'H2'].values[0]
+                    comparisonDF[chosen_scenario_id]['Volume'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Demand Notes', 'H2'].values[0]
+                    comparisonDF[chosen_scenario_id]['Periods'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Period Notes', 'H2'].values[0]
+                    comparisonDF[chosen_scenario_id]['Min Batch?'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Period Notes', 'H2'].values[0]
+                    comparisonDF[chosen_scenario_id]['Min Load?'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Period Notes', 'H2'].values[0]
+                    comparisonDF[chosen_scenario_id]['Req. Sales (M, Cases)'] = chosen_scenario_summary[(chosen_scenario_summary['H1'] == "Volume") &(chosen_scenario_summary['H2'] == "Demand") &(chosen_scenario_summary['H3'] == "Required") &(chosen_scenario_summary['H4'] == "Total")]["Report Total"].sum()
+                    comparisonDF[chosen_scenario_id]['Actual Sales (M, Cases)'] = chosen_scenario_summary[(chosen_scenario_summary['H1'] == "Volume") &(chosen_scenario_summary['H2'] == "Demand") &(chosen_scenario_summary['H3'] == "Delivered") &(chosen_scenario_summary['H4'] == "Total")]["Report Total"].sum()
+                    comparisonDF[chosen_scenario_id]['Total Packed (M, Cases)'] = chosen_scenario_summary[(chosen_scenario_summary['H1'] == "Volume") &(chosen_scenario_summary['H2'] == "Quantity") &(chosen_scenario_summary['H3'] == "Pk")]["Report Total"].sum()
+                    comparisonDF[chosen_scenario_id]['Internal cs Co-Man (Pack)'] = "x/y"
+                    comparisonDF[chosen_scenario_id]['Outbound Miles / Shipment'] = ""
+                    comparisonDF[chosen_scenario_id]['Total COGS (M)'] = 12222222222222222
+                    comparisonDF[chosen_scenario_id]['Total Indirect COGS (M)'] = 1
+                    comparisonDF[chosen_scenario_id]['Total COGS / Cs'] = 1
+                    comparisonDF[chosen_scenario_id]['Total Direct COGS / Cs'] = 1
+                    comparisonDF[chosen_scenario_id]['Total Indirect COGS / Cs'] = 1
+                    comparisonDF[chosen_scenario_id]['Total Direct COGS (Var, M)'] = 1
+                    comparisonDF[chosen_scenario_id]['Manufacturing (Pd)'] = 1
+                    comparisonDF[chosen_scenario_id]['Manufacturing (Pk)'] = 1
+                    comparisonDF[chosen_scenario_id]['Manufacturing (rPk)'] = 1
+                    comparisonDF[chosen_scenario_id]['Co-Man Penalties (Pd)'] = 1
+                    comparisonDF[chosen_scenario_id]['Co-Man Penalties (Pk)'] = 1
+                    comparisonDF[chosen_scenario_id]['Co-Man Penalties (rPk)'] = 1
+                    comparisonDF[chosen_scenario_id]['Freight (SUBS Total)'] = 1
+                    comparisonDF[chosen_scenario_id]['Freight (Pk_Wip)'] = 1
+                    comparisonDF[chosen_scenario_id]['Freight (WIP_rPk)'] = 1
+                    comparisonDF[chosen_scenario_id]['Total Direct COGS (Fxd, M)'] = 1
+                    comparisonDF[chosen_scenario_id]['Fixed Costs'] = 1
+                    comparisonDF[chosen_scenario_id]['Other Non Fixed Adj'] = 1
+                    comparisonDF[chosen_scenario_id]['Total Indirect COGS (Var, M)'] = 1
+                    comparisonDF[chosen_scenario_id]['Handling'] = 1
+                    comparisonDF[chosen_scenario_id]['Storage'] = 1
+                    comparisonDF[chosen_scenario_id]['Intercompany Freight (Inter GFB, VP, NVP - TOTAL)'] = 1
+                    comparisonDF[chosen_scenario_id]['Freight (Pd_Pk)'] = 1
+                    comparisonDF[chosen_scenario_id]['Freight (Pk_FG)'] = 1
+                    comparisonDF[chosen_scenario_id]['Freight (rPk_FG)'] = 1
+                    comparisonDF[chosen_scenario_id]['Outbound Freight (VP, NVP - TOTAL)'] = 1
+                    comparisonDF[chosen_scenario_id]['Freight (FG_Cm)'] = 1
+                    comparisonDF[chosen_scenario_id]['Loads_SF (FG_Cm)'] = 1
+                    comparisonDF[chosen_scenario_id]['Dunnage'] = 1
+                    comparisonDF[chosen_scenario_id]['Other'] = 1
+                    comparisonDF[chosen_scenario_id]['Total Indirect COGS (Fxd, M)'] = 1
+                    comparisonDF[chosen_scenario_id]['Fixed Storage & Handling'] = 1
+                    comparisonDF[chosen_scenario_id]['Other fixed'] = 1
+                    comparisonDF[chosen_scenario_id]['Other Non Fixed Adj'] = 1
+                    comparisonDF[chosen_scenario_id]['Pk Qty (M Cases/Yr)'] = 1
+                    comparisonDF[chosen_scenario_id]['Avg. Pd Utilization (Hrs)'] = 1
+                    comparisonDF[chosen_scenario_id]['Avg. Pk Utilization (Hrs)'] = 1
+                    comparisonDF[chosen_scenario_id]['Avg. rPk Utilization (Hrs)'] = 1
+                    comparisonDF[chosen_scenario_id]['Avg. Storage Utilization (WIP and/or FG, Cs)'] = 1
+                    comparisonDF[chosen_scenario_id]['Max Storage Utilization (WIP and/or FG, Cs)'] = 1
+                    # </editor-fold>
+                    st.session_state['chosen_comparison_scenarios'].append(chosen_scenario_id)
+                    st.success(f"Successfully added Scenario '{chosen_scenario}' to the Comparison!")
+                else:
+                    st.warning(f"Sorry, scenario '{chosen_scenario}' is old and cannot be added to the Comparison at this time")
+            else:
+                st.warning(f"Warning! Scenario '{chosen_scenario}' is already in the list")
+    # </editor-fold>
+
+    #chosen_comparison_scenarios_Tuple = tuple(st.session_state['chosen_comparison_scenarios'])
+    #st.write(chosen_comparison_scenarios_Tuple)
+    #st.write(st.session_state['chosen_comparison_scenarios'])
+    st.dataframe(comparisonDF)
+
+    #for numSc in chosen_comparison_scenarios_Tuple:
+
+
+
 # <editor-fold desc="Page Navigation">
 pages = {
 "Main Page": main_page,
 "Manufacturing Page": manufacturing_page,
 "Distribution Page": distribution_page,
+"Comparison Page": comparison_page,
 }
 page = st.sidebar.radio("Select a page", pages.keys())
 pages[page]()
