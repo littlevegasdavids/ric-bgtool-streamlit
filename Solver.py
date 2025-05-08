@@ -417,7 +417,7 @@ for itn in range(itnNumber):
 
 
 
-    for columnName, columnData in Period_tb.iteritems():
+    for columnName, columnData in Period_tb.items():
 
         if columnName in cpReporting_data['Period Number']:
             newName = str(cpReporting_data['Period Number'][columnName]) + str(':') + str(columnName)
@@ -428,7 +428,7 @@ for itn in range(itnNumber):
 
 
 
-    for columnName, columnData in CapLimit_tb.iteritems():
+    for columnName, columnData in CapLimit_tb.items():
 
         if columnName in cpReporting_data['Period Number']:
             newName = str(cpReporting_data['Period Number'][columnName]) + str(':') + str(columnName)
@@ -463,7 +463,7 @@ for itn in range(itnNumber):
         if cpReporting_data['Include in Report Period'][periodName] == 'No':
             del CmDem_tb[periodName]
 
-    for columnName, columnData in CmDem_tb.iteritems():
+    for columnName, columnData in CmDem_tb.items():
 
         if columnName in cpReporting_data['Period Number'] and cpReporting_data['Include in Report Period'][columnName] == 'Yes':
             newName = str(cpReporting_data['Period Number'][columnName]) + str(':') + str(columnName)
@@ -509,7 +509,7 @@ for itn in range(itnNumber):
 
     position = 1
     cpWarmUpLst = []
-    for columnName, columnData in warmUp_df.iteritems():
+    for columnName, columnData in warmUp_df.items():
         warmUp_df[columnName] = (1 + cpWarmUp_data['Volume Escalation'][columnName]) * warmUp_df[columnName]
         newName = cpWarmUp_data['Period Number'][columnName]
         warmUp_df.rename(columns={columnName : newName}, inplace=True)
@@ -523,7 +523,7 @@ for itn in range(itnNumber):
 
     coolDown_df = addPeriodsColumnFn(coolDown_lst, cpCoolDown_data).copy()
 
-    for columnName, columnData in coolDown_df.iteritems():
+    for columnName, columnData in coolDown_df.items():
         coolDown_df[columnName] = (1 + cpCoolDown_data['Volume Escalation'][columnName]) * coolDown_df[columnName]
         newName = cpCoolDown_data['Period Number'][columnName]
         coolDown_df.rename(columns={columnName : newName}, inplace=True)
