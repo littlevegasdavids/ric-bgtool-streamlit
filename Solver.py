@@ -3830,7 +3830,7 @@ if __name__ == '__main__':
             cases = float(FGSQ_soln['Cases'].iloc[index])
             var_cost = float(FGSQ_soln['Var Cost ($/Cs/Hr)'].iloc[index])
             var_period_cost = float(FGSQ_soln['Var Period Cost($/Cs)'].iloc[index])
-            sku_group = FGSQ_soln['SKU Group'][index]
+            sku_group = FGSQ_soln['SKU Group'].iloc[index]
             parent_sku_group = FGSQ_soln['Parent SKU Grp'].iloc[index]
             child_sku_group = FGSQ_soln['Child SKU Grp'].iloc[index]
             index += 1
