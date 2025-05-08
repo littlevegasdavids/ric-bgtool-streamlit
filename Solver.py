@@ -697,8 +697,8 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        Min_Batch_tb.iloc[:,1:Min_Batch_tb.shape[1]] = Min_Batch_tb.iloc[:,1:Min_Batch_tb.shape[1]].astype(float) / scalingVolume
-    Min_Batch_tb = Min_Batch_tb.fillna(0)
+        Min_Batch_tb.iloc[:, 1:Min_Batch_tb.shape[1]] = Min_Batch_tb.iloc[:, 1:Min_Batch_tb.shape[1]].apply(pd.to_numeric, errors='coerce').astype(float) / scalingVolume    
+        Min_Batch_tb = Min_Batch_tb.fillna(0)
     Min_Batch_data = pnd.DataFrame(Min_Batch_tb).groupby('Pk_Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(Min_Batch_data)
