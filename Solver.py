@@ -549,7 +549,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        FGInit_tb.iloc[:,1:FGInit_tb.shape[1]] = FGInit_tb.iloc[:,1:FGInit_tb.shape[1]] / scalingVolume
+        FGInit_tb.iloc[:,1:FGInit_tb.shape[1]] = FGInit_tb.iloc[:,1:FGInit_tb.shape[1]].astype(float) / scalingVolume
     FGInit_tb['SKU_Number'] = FGInit_tb['SKU_Number'].astype(str)
     FGInit_tb = pnd.DataFrame(FGInit_tb)
     if modelGrpLevel == 'Yes':
@@ -563,7 +563,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]] = WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]] / scalingVolume
+        WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]] = WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]].astype(float) / scalingVolume
     WIPInit_tb['SKU_Number'] = WIPInit_tb['SKU_Number'].astype(str)
     WIPInit_tb = pnd.DataFrame(WIPInit_tb)
     if modelGrpLevel == 'Yes':
@@ -615,7 +615,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        PdCap_tb.iloc[:,1:PdCap_tb.shape[1]] = PdCap_tb.iloc[:,1:PdCap_tb.shape[1]] / scalingVolume
+        PdCap_tb.iloc[:,1:PdCap_tb.shape[1]] = PdCap_tb.iloc[:,1:PdCap_tb.shape[1]].astype(float) / scalingVolume
     PdCap_data = pnd.DataFrame(PdCap_tb).groupby('Site').apply(lambda x: x.set_index('Stream').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(PdCap_data)
@@ -653,7 +653,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        PkCap_tb.iloc[:,1:PkCap_tb.shape[1]] = PkCap_tb.iloc[:,1:PkCap_tb.shape[1]] / scalingVolume
+        PkCap_tb.iloc[:,1:PkCap_tb.shape[1]] = PkCap_tb.iloc[:,1:PkCap_tb.shape[1]].astype(float) / scalingVolume
     PkCap_data = pnd.DataFrame(PkCap_tb).groupby('Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(PkCap_data)
@@ -697,7 +697,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        Min_Batch_tb.iloc[:,1:Min_Batch_tb.shape[1]] = Min_Batch_tb.iloc[:,1:Min_Batch_tb.shape[1]] / scalingVolume
+        Min_Batch_tb.iloc[:,1:Min_Batch_tb.shape[1]] = Min_Batch_tb.iloc[:,1:Min_Batch_tb.shape[1]].astype(float) / scalingVolume
     Min_Batch_tb = Min_Batch_tb.fillna(0)
     Min_Batch_data = pnd.DataFrame(Min_Batch_tb).groupby('Pk_Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
@@ -705,7 +705,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        rPkCap_tb.iloc[:,1:rPkCap_tb.shape[1]] = rPkCap_tb.iloc[:,1:rPkCap_tb.shape[1]] / scalingVolume
+        rPkCap_tb.iloc[:,1:rPkCap_tb.shape[1]] = rPkCap_tb.iloc[:,1:rPkCap_tb.shape[1]].astype(float) / scalingVolume
     rPkCap_data = pnd.DataFrame(rPkCap_tb).groupby('Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
 
     if modelGrpLevel == 'No':
@@ -714,7 +714,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        rPkGrp_tb['Min_Grp_Qty'] = rPkGrp_tb['Min_Grp_Qty'] / scalingVolume
+        rPkGrp_tb['Min_Grp_Qty'] = rPkGrp_tb['Min_Grp_Qty'].astype(float) / scalingVolume
         rPkGrp_tb['Min_Grp_Penalty'] = rPkGrp_tb['Min_Grp_Penalty'] * scalingVolume / scalingCost
     rPkGrp_data = pnd.DataFrame(rPkGrp_tb).to_dict()
 
@@ -743,7 +743,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        WIPCap_tb['Total_Storage'] = WIPCap_tb['Total_Storage'] / scalingVolume
+        WIPCap_tb['Total_Storage'] = WIPCap_tb['Total_Storage'].astype(float) / scalingVolume
     WIPCap_data = pnd.DataFrame(WIPCap_tb).groupby('Site').apply(lambda x: x.set_index('Expansion').to_dict(orient='index')).to_dict()
 
 
@@ -766,7 +766,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        FGCap_tb['Total_Storage'] = FGCap_tb['Total_Storage'] / scalingVolume
+        FGCap_tb['Total_Storage'] = FGCap_tb['Total_Storage'].astype(float) / scalingVolume
     FGCap_data = pnd.DataFrame(FGCap_tb).groupby('Site').apply(lambda x: x.set_index('Expansion').to_dict(orient='index')).to_dict()
 
     FGSiteType_data = pnd.DataFrame(FGSiteType_tb).groupby('Site').apply(lambda x: x.set_index('Expansion').to_dict(orient='index')).to_dict()
