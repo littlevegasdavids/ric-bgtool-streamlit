@@ -697,7 +697,10 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        Min_Batch_tb.iloc[:, 1:Min_Batch_tb.shape[1]] = Min_Batch_tb.iloc[:, 1:Min_Batch_tb.shape[1]].apply(pd.to_numeric, errors='coerce').astype(float) / scalingVolume    
+        # Ensure all values being assigned are floats
+        Min_Batch_tb.iloc[:, 1:] = Min_Batch_tb.iloc[:, 1:].astype(float) / scalingVolume
+
+        # Fill any NaN values with 0 afterward
         Min_Batch_tb = Min_Batch_tb.fillna(0)
     Min_Batch_data = pnd.DataFrame(Min_Batch_tb).groupby('Pk_Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
