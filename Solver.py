@@ -3735,7 +3735,7 @@ if __name__ == '__main__':
             truck_loads = float(FG_Cm_soln['Truck Loads'].iloc[index])
             sku_group = FG_Cm_soln['SKU Group'].iloc[index]
             parent_sku_group = str(FG_Cm_soln['Parent SKU Grp'].iloc[index])
-            child_sku_group = str(FG_Cm_soln['Child SKU Grp'.iloc][index])
+            child_sku_group = str(FG_Cm_soln['Child SKU Grp'].iloc[index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, fg_warehouse, distributor, sku, cases, dist_cost, route_miles, truck_loads, sku_group,
