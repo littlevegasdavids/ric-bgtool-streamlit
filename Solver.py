@@ -3557,7 +3557,7 @@ if __name__ == '__main__':
             prod_site = row[1]
             raw_material = row[2]
             period = row[3]
-            quantity = PdS_Pd_soln['Quantity'][index]
+            quantity = float(PdS_Pd_soln['Quantity'].iloc[index])
             index += 1
             db_cur.execute(sql, (scenarioId, prod_supplier, prod_site, raw_material, period, quantity))
         db_conn.commit()
@@ -3573,7 +3573,7 @@ if __name__ == '__main__':
             pack_site = row[1]
             raw_material = row[2]
             period = row[3]
-            quantity = PkS_Pk_soln['Quantity'][index]
+            quantity = float(PkS_Pk_soln['Quantity'].iloc[index])
             index += 1
             db_cur.execute(sql, (scenarioId, pack_supplier, pack_site, raw_material, period, quantity))
         db_conn.commit()
@@ -3589,7 +3589,7 @@ if __name__ == '__main__':
             repack_site = row[1]
             raw_material = row[2]
             period = row[3]
-            quantity = rPkS_rPk_soln['Quantity'][index]
+            quantity = float(rPkS_rPk_soln['Quantity'].iloc[index])
             index += 1
             db_cur.execute(sql, (scenarioId, repack_supplier, raw_material, period, quantity, repack_site))
         db_conn.commit()
@@ -3605,11 +3605,11 @@ if __name__ == '__main__':
             pack_site = row[2]
             sku = row[3]
             period = row[4]
-            litres = Pd_Pk_soln['Liters'][index]
-            dist_cost = Pd_Pk_soln['Dist. Cost ($/Cs)'][index]
-            route_miles = Pd_Pk_soln['Route Miles'][index]
-            truck_loads = Pd_Pk_soln['Truck Loads'][index]
-            sku_group = Pd_Pk_soln['SKU Group'][index]
+            litres = float(Pd_Pk_soln['Liters'].iloc[index])
+            dist_cost = float(Pd_Pk_soln['Dist. Cost ($/Cs)'].iloc[index])
+            route_miles = float(Pd_Pk_soln['Route Miles'].iloc[index])
+            truck_loads = float(Pd_Pk_soln['Truck Loads'].iloc[index])
+            sku_group = Pd_Pk_soln['SKU Group'].iloc[index]
             parent_sku_group = "nan"
             child_sku_group = "nan"
             db_cur.execute(sql, (
@@ -3628,14 +3628,14 @@ if __name__ == '__main__':
             fg_warehouse = row[2]
             sku = row[3]
             period = row[4]
-            cases = Pk_FG_soln['Cases'][index]
-            dist_cost = Pk_FG_soln['Dist. Cost ($/Cs)'][index]
-            wh_handling = Pk_FG_soln['WH Handling ($/Cs)'][index]
-            route_miles = Pk_FG_soln['Route Miles'][index]
-            truck_loads = Pk_FG_soln['Truck Loads'][index]
-            sku_group = Pk_FG_soln['SKU Group'][index]
-            parent_sku_group = str(Pk_FG_soln['Parent SKU Grp'][index])
-            child_sku_group = str(Pk_FG_soln['Child SKU Grp'][index])
+            cases = float(Pk_FG_soln['Cases'].iloc[index])
+            dist_cost = float(Pk_FG_soln['Dist. Cost ($/Cs)'].iloc[index])
+            wh_handling = float(Pk_FG_soln['WH Handling ($/Cs)'].iloc[index])
+            route_miles = float(Pk_FG_soln['Route Miles'].iloc[index])
+            truck_loads = float(Pk_FG_soln['Truck Loads'].iloc[index])
+            sku_group = Pk_FG_soln['SKU Group'].iloc[index]
+            parent_sku_group = str(Pk_FG_soln['Parent SKU Grp'].iloc[index])
+            child_sku_group = str(Pk_FG_soln['Child SKU Grp'].iloc[index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, pack_site, fg_warehouse, sku, period, cases, dist_cost, wh_handling, route_miles, truck_loads,
@@ -3653,14 +3653,14 @@ if __name__ == '__main__':
             wip_warehouse = row[2]
             sku = row[3]
             period = row[4]
-            cases = Pk_WIP_soln['Cases'][index]
-            dist_cost = Pk_WIP_soln['Dist. Cost ($/Cs)'][index]
-            wh_handling = Pk_WIP_soln['WH Handling ($/Cs)'][index]
-            route_miles = Pk_WIP_soln['Route Miles'][index]
-            truck_loads = Pk_WIP_soln['Truck Loads'][index]
-            sku_group = Pk_WIP_soln['SKU Group'][index]
-            parent_sku_group = str(Pk_WIP_soln['Parent SKU Grp'][index])
-            child_sku_group = str(Pk_WIP_soln['Child SKU Grp'][index])
+            cases = Pk_WIP_soln['Cases'].iloc[index]
+            dist_cost = float(Pk_WIP_soln['Dist. Cost ($/Cs)'].iloc[index])
+            wh_handling = float(Pk_WIP_soln['WH Handling ($/Cs)'].iloc[index])
+            route_miles = float(Pk_WIP_soln['Route Miles'].iloc[index])
+            truck_loads = float(Pk_WIP_soln['Truck Loads'].iloc[index])
+            sku_group = Pk_WIP_soln['SKU Group'].iloc[index]
+            parent_sku_group = str(Pk_WIP_soln['Parent SKU Grp'].iloc[index])
+            child_sku_group = str(Pk_WIP_soln['Child SKU Grp'].iloc[index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, pack_site, wip_warehouse, sku, period, cases, dist_cost, wh_handling, route_miles, truck_loads,
@@ -3678,13 +3678,14 @@ if __name__ == '__main__':
             repack_site = row[2]
             sku = row[3]
             period = row[4]
-            cases = WIP_rPk_soln['Cases'][index]
-            dist_cost = WIP_rPk_soln['Dist. Cost ($/Cs)'][index]
-            route_miles = WIP_rPk_soln['Route Miles'][index]
-            truck_loads = WIP_rPk_soln['Truck Loads'][index]
-            sku_group = WIP_rPk_soln['SKU Group'][index]
-            parent_sku_group = str(WIP_rPk_soln['Parent SKU Grp'][index])
-            child_sku_group = str(WIP_rPk_soln['Child SKU Grp'][index])
+            cases = float(WIP_rPk_soln['Cases'].iloc[index])
+            dist_cost = float(WIP_rPk_soln['Dist. Cost ($/Cs)'].iloc[index])
+            wh_handling = float(WIP_rPk_soln['WH Handling ($/Cs)'].iloc[index])
+            route_miles = float(WIP_rPk_soln['Route Miles'].iloc[index])
+            truck_loads = float(WIP_rPk_soln['Truck Loads'].iloc[index])
+            sku_group = WIP_rPk_soln['SKU Group'].iloc[index]
+            parent_sku_group = str(WIP_rPk_soln['Parent SKU Grp'].iloc[index])
+            child_sku_group = str(WIP_rPk_soln['Child SKU Grp'].iloc[index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, repack_site, wip_warehouse, sku, period, cases, dist_cost, wh_handling, route_miles,
@@ -3702,14 +3703,14 @@ if __name__ == '__main__':
             fg_warehouse = row[2]
             sku = row[3]
             period = row[4]
-            cases = rPk_FG_soln['Cases'][index]
-            dist_cost = rPk_FG_soln['Dist. Cost ($/Cs)'][index]
-            wh_handling = rPk_FG_soln['WH Handling ($/Cs)'][index]
-            route_miles = rPk_FG_soln['Route Miles'][index]
-            truck_loads = rPk_FG_soln['Truck Loads'][index]
-            sku_group = rPk_FG_soln['SKU Group'][index]
-            parent_sku_group = str(rPk_FG_soln['Parent SKU Grp'][index])
-            child_sku_group = str(rPk_FG_soln['Child SKU Grp'][index])
+            cases = float(rPk_FG_soln['Cases'].iloc[index])
+            dist_cost = float(rPk_FG_soln['Dist. Cost ($/Cs)'].iloc[index])
+            wh_handling = float(rPk_FG_soln['WH Handling ($/Cs)'].iloc[index])
+            route_miles = float(rPk_FG_soln['Route Miles'].iloc[index])
+            truck_loads = float(rPk_FG_soln['Truck Loads'].iloc[index])
+            sku_group = rPk_FG_soln['SKU Group'].iloc[index]
+            parent_sku_group = str(rPk_FG_soln['Parent SKU Grp'].iloc[index])
+            child_sku_group = str(rPk_FG_soln['Child SKU Grp'].iloc[index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, repack_site, fg_warehouse, sku, period, cases, dist_cost, wh_handling, route_miles, truck_loads,
@@ -3727,13 +3728,13 @@ if __name__ == '__main__':
             fg_warehouse = row[1]
             sku = row[3]
             period = row[4]
-            cases = FG_Cm_soln['Cases'][index]
-            dist_cost = FG_Cm_soln['Dist. Cost ($/Cs)'][index]
-            route_miles = FG_Cm_soln['Route Miles'][index]
-            truck_loads = FG_Cm_soln['Truck Loads'][index]
-            sku_group = FG_Cm_soln['SKU Group'][index]
-            parent_sku_group = str(FG_Cm_soln['Parent SKU Grp'][index])
-            child_sku_group = str(FG_Cm_soln['Child SKU Grp'][index])
+            cases = float(FG_Cm_soln['Cases'].iloc[index])
+            dist_cost = float(FG_Cm_soln['Dist. Cost ($/Cs)'].iloc[index])
+            route_miles = float(FG_Cm_soln['Route Miles'].iloc[index])
+            truck_loads = float(FG_Cm_soln['Truck Loads'].iloc[index])
+            sku_group = FG_Cm_soln['SKU Group'].iloc[index]
+            parent_sku_group = str(FG_Cm_soln['Parent SKU Grp'].iloc[index])
+            child_sku_group = str(FG_Cm_soln['Child SKU Grp'.iloc][index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, fg_warehouse, distributor, sku, cases, dist_cost, route_miles, truck_loads, sku_group,
@@ -3751,14 +3752,14 @@ if __name__ == '__main__':
             stream = row[2]
             sku = row[3]
             period = row[4]
-            litres = PdStQ_soln['Liters'][index]
-            var_cost = PdStQ_soln['Var Cost ($/Lt)'][index]
-            eff_capacity = PdStQ_soln['Eff. Capacity (Lt/Hrs)'][index]
-            rqd_stream_hours = PdStQ_soln['Rqd. Stream Hrs'][index]
-            site_group = PdStQ_soln['Site Group'][index]
-            sku_group = PdStQ_soln['SKU Group'][index]
-            parent_sku_group = str(PdStQ_soln['Parent SKU Grp'][index])
-            child_sku_group = str(PdStQ_soln['Child SKU Grp'][index])
+            litres = float(PdStQ_soln['Liters'].iloc[index])
+            var_cost = float(PdStQ_soln['Var Cost ($/Lt)'].iloc[index])
+            eff_capacity = float(PdStQ_soln['Eff. Capacity (Lt/Hrs)'].iloc[index])
+            rqd_stream_hours = float(PdStQ_soln['Rqd. Stream Hrs'].iloc[index])
+            site_group = PdStQ_soln['Site Group'].iloc[index]
+            sku_group = PdStQ_soln['SKU Group'].iloc[index]
+            parent_sku_group = str(PdStQ_soln['Parent SKU Grp'].iloc[index])
+            child_sku_group = str(PdStQ_soln['Child SKU Grp'].iloc[index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, prod_site, stream, sku, litres, var_cost, eff_capacity, rqd_stream_hours, site_group, sku_group,
@@ -3776,14 +3777,14 @@ if __name__ == '__main__':
             line = row[2]
             sku = row[3]
             period = row[4]
-            cases = PkLnQ_soln['Cases'][index]
-            var_cost = PkLnQ_soln['Var Cost ($/Cs)'][index]
-            eff_capacity = PkLnQ_soln['Eff. Capacity (Cs/Hrs)'][index]
-            rqd_lines_hours = PkLnQ_soln['Rqd. Line Hours'][index]
-            site_group = PkLnQ_soln['Site Group'][index]
-            sku_group = PkLnQ_soln['SKU Group'][index]
-            parent_sku_group = str(PkLnQ_soln['Parent SKU Grp'][index])
-            child_sku_group = str(PkLnQ_soln['Child SKU Grp'][index])
+            cases = float(PkLnQ_soln['Cases'].iloc[index])
+            var_cost = float(PkLnQ_soln['Var Cost ($/Cs)'].iloc[index])
+            eff_capacity = float(PkLnQ_soln['Eff. Capacity (Cs/Hrs)'].iloc[index])
+            rqd_lines_hours = float(PkLnQ_soln['Rqd. Line Hours'].iloc[index])
+            site_group = PkLnQ_soln['Site Group'].iloc[index]
+            sku_group = PkLnQ_soln['SKU Group'].iloc[index]
+            parent_sku_group = str(PkLnQ_soln['Parent SKU Grp'].iloc[index])
+            child_sku_group = str(PkLnQ_soln['Child SKU Grp'].iloc[index])
             index += 1
             db_cur.execute(sql, (
             scenarioId, pack_site, line, sku, cases, var_cost, eff_capacity, rqd_lines_hours, site_group, sku_group,
@@ -3801,14 +3802,14 @@ if __name__ == '__main__':
             line = row[2]
             sku = row[3]
             period = row[4]
-            cases = rPkLnQ_soln['Cases'][index]
-            var_cost = rPkLnQ_soln['Var Cost ($/Cs)'][index]
-            eff_capacity = rPkLnQ_soln['Eff. Capacity (Cs/Hrs)'][index]
-            rqd_lines_hours = rPkLnQ_soln['Rqd. Line Hours'][index]
-            site_group = rPkLnQ_soln['Site Group'][index]
-            sku_group = rPkLnQ_soln['SKU Group'][index]
-            parent_sku_group = rPkLnQ_soln['Parent SKU Grp'][index]
-            child_sku_group = rPkLnQ_soln['Child SKU Grp'][index]
+            cases = float(rPkLnQ_soln['Cases'].iloc[index])
+            var_cost = float(rPkLnQ_soln['Var Cost ($/Cs)'].iloc[index])
+            eff_capacity = float(rPkLnQ_soln['Eff. Capacity (Cs/Hrs)'].iloc[index])
+            rqd_lines_hours = float(rPkLnQ_soln['Rqd. Line Hours'].iloc[index])
+            site_group = rPkLnQ_soln['Site Group'].iloc[index]
+            sku_group = rPkLnQ_soln['SKU Group'].iloc[index]
+            parent_sku_group = rPkLnQ_soln['Parent SKU Grp'].iloc[index]
+            child_sku_group = rPkLnQ_soln['Child SKU Grp'].iloc[index]
             index += 1
             db_cur.execute(sql, (
             scenarioId, repack_site, line, sku, cases, var_cost, eff_capacity, rqd_lines_hours, site_group, sku_group,
@@ -3825,12 +3826,12 @@ if __name__ == '__main__':
             fg_warehouse = row[1]
             sku = row[2]
             period = row[3]
-            cases = FGSQ_soln['Cases'][index]
-            var_cost = FGSQ_soln['Var Cost ($/Cs/Hr)'][index]
-            var_period_cost = FGSQ_soln['Var Period Cost($/Cs)'][index]
+            cases = float(FGSQ_soln['Cases'].iloc[index])
+            var_cost = float(FGSQ_soln['Var Cost ($/Cs/Hr)'].iloc[index])
+            var_period_cost = float(FGSQ_soln['Var Period Cost($/Cs)'].iloc[index])
             sku_group = FGSQ_soln['SKU Group'][index]
-            parent_sku_group = FGSQ_soln['Parent SKU Grp'][index]
-            child_sku_group = FGSQ_soln['Child SKU Grp'][index]
+            parent_sku_group = FGSQ_soln['Parent SKU Grp'].iloc[index]
+            child_sku_group = FGSQ_soln['Child SKU Grp'].iloc[index]
             index += 1
             db_cur.execute(sql, (
             scenarioId, fg_warehouse, sku, cases, var_cost, var_period_cost, sku_group, parent_sku_group,
@@ -3847,12 +3848,12 @@ if __name__ == '__main__':
             wip_warehouse = row[1]
             sku = row[2]
             period = row[3]
-            cases = WIPSQ_soln['Cases'][index]
-            var_cost = WIPSQ_soln['Var Cost ($/Cs/Hr)'][index]
-            var_period_cost = WIPSQ_soln['Var Period Cost($/Cs)'][index]
-            sku_group = WIPSQ_soln['SKU Group'][index]
-            parent_sku_group = WIPSQ_soln['Parent SKU Grp'][index]
-            child_sku_group = WIPSQ_soln['Child SKU Grp'][index]
+            cases = float(WIPSQ_soln['Cases'].iloc[index])
+            var_cost = float(WIPSQ_soln['Var Cost ($/Cs/Hr)'].iloc[index])
+            var_period_cost = float(WIPSQ_soln['Var Period Cost($/Cs)'].iloc[index])
+            sku_group = WIPSQ_soln['SKU Group'].iloc[index]
+            parent_sku_group = WIPSQ_soln['Parent SKU Grp'].iloc[index]
+            child_sku_group = WIPSQ_soln['Child SKU Grp'].iloc[index]
             index += 1
             db_cur.execute(sql, (
             scenarioId, sku, cases, var_cost, var_period_cost, sku_group, parent_sku_group, child_sku_group, period,
