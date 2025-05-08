@@ -3680,6 +3680,8 @@ if __name__ == '__main__':
             period = row[4]
             cases = float(WIP_rPk_soln['Cases'].iloc[index])
             dist_cost = float(WIP_rPk_soln['Dist. Cost ($/Cs)'].iloc[index])
+            # Angelo - Key Error. This wh_handling value will be equal to Pk_WIP.wh_handling value
+            # wh_handling = float(WIP_rPk_soln['WH Handling ($/Cs)'].iloc[index])
             route_miles = float(WIP_rPk_soln['Route Miles'].iloc[index])
             truck_loads = float(WIP_rPk_soln['Truck Loads'].iloc[index])
             sku_group = WIP_rPk_soln['SKU Group'].iloc[index]
