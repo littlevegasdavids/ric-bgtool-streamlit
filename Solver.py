@@ -549,6 +549,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
+        print(FGInit_tb.iloc[:, 1:])
         numeric_part = FGInit_tb.iloc[:, 1:].astype(float) / scalingVolume
         FGInit_tb.iloc[:,1:] = numeric_part
     FGInit_tb['SKU_Number'] = FGInit_tb['SKU_Number'].astype(str)
