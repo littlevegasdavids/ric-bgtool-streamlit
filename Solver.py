@@ -549,7 +549,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        print(FGInit_tb.iloc[:, 1:])
+        #print(FGInit_tb.iloc[:, 1:])
         numeric_part = FGInit_tb.iloc[:, 1:].astype(float) / scalingVolume
         FGInit_tb.iloc[:,1:] = numeric_part
     FGInit_tb['SKU_Number'] = FGInit_tb['SKU_Number'].astype(str)
@@ -565,6 +565,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
+        print(WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]])
         WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]] = WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]].astype(float) / scalingVolume
     WIPInit_tb['SKU_Number'] = WIPInit_tb['SKU_Number'].astype(str)
     WIPInit_tb = pnd.DataFrame(WIPInit_tb)
