@@ -634,7 +634,16 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        PdCap_tb.iloc[:,1:PdCap_tb.shape[1]] = PdCap_tb.iloc[:,1:PdCap_tb.shape[1]].astype(float) / scalingVolume
+        #PdCap_tb.iloc[:,1:PdCap_tb.shape[1]] = PdCap_tb.iloc[:,1:PdCap_tb.shape[1]].astype(float) / scalingVolume
+        # Get all columns from column index 1 onward
+        cols_to_modify = PdCap_tb.columns[1:]
+
+        # Select the numeric columns only
+        numeric_cols = PdCap_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+
+        # Explicitly cast to float64 before assignment to prevent dtype issues
+        PdCap_tb[numeric_cols] = PdCap_tb[numeric_cols].astype("float64") / scalingVolume
+
     PdCap_data = pnd.DataFrame(PdCap_tb).groupby('Site').apply(lambda x: x.set_index('Stream').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(PdCap_data)
@@ -716,12 +725,15 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-       # Ensure all columns are numeric before performing the operation
-        Min_Batch_tb.iloc[:, 1:Min_Batch_tb.shape[1]] = Min_Batch_tb.iloc[:, 1:Min_Batch_tb.shape[1]].apply(
-            lambda col: pnd.to_numeric(col, errors='coerce')
-        ).fillna(0).astype(float) / scalingVolume
-        # Fill any NaN values with 0 afterward
-        Min_Batch_tb = Min_Batch_tb.fillna(0)
+        # Get all columns from column index 1 onward
+        cols_to_modify = Min_Batch_tb.columns[1:]
+
+        # Select the numeric columns only
+        numeric_cols = Min_Batch_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+
+        # Perform the scaling operation safely
+        Min_Batch_tb[numeric_cols] = Min_Batch_tb[numeric_cols] / scalingVolume
+
     Min_Batch_data = pnd.DataFrame(Min_Batch_tb).groupby('Pk_Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(Min_Batch_data)
