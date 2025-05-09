@@ -549,9 +549,17 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        #print(FGInit_tb.iloc[:, 1:])
-        numeric_part = FGInit_tb.iloc[:, 1:].astype(float) / scalingVolume
-        FGInit_tb.iloc[:,1:] = numeric_part
+        # print(FGInit_tb.iloc[:, 1:])
+        # numeric_part = FGInit_tb.iloc[:, 1:].astype(float) / scalingVolume
+        # FGInit_tb.iloc[:,1:] = numeric_part
+        # Get all columns from column index 1 onward
+        cols_to_modify = FGInit_tb.columns[1:]
+
+        # Select the numeric columns only (in case some are non-numeric)
+        numeric_cols = FGInit_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+
+        # Explicitly cast to float64 before assignment to prevent dtype issues
+        FGInit_tb[numeric_cols] = FGInit_tb[numeric_cols].astype("float64") / scalingVolume
     FGInit_tb['SKU_Number'] = FGInit_tb['SKU_Number'].astype(str)
     FGInit_tb = pnd.DataFrame(FGInit_tb)
     if modelGrpLevel == 'Yes':
