@@ -573,8 +573,16 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        print(WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]])
-        WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]] = WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]].astype(float) / scalingVolume
+        #print(WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]])
+        #WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]] = WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]].astype(float) / scalingVolume
+        # Get all columns from column index 1 onward
+        cols_to_modify = WIPInit_tb.columns[1:]
+
+        # Select the numeric columns only
+        numeric_cols = WIPInit_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+
+        # Explicitly cast to float64 before assignment to prevent dtype issues
+        WIPInit_tb[numeric_cols] = WIPInit_tb[numeric_cols].astype("float64") / scalingVolume
     WIPInit_tb['SKU_Number'] = WIPInit_tb['SKU_Number'].astype(str)
     WIPInit_tb = pnd.DataFrame(WIPInit_tb)
     if modelGrpLevel == 'Yes':
