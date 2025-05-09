@@ -549,7 +549,7 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        FGInit_tb.iloc[:,1:] = (FGInit_tb.iloc[:,1:].apply(pnd.to_numeric, errors='coerce').astype(float)) / scalingVolume
+        FGInit_tb.iloc[:,1:] = (FGInit_tb.iloc[:,1:].apply(pnd.to_numeric, errors='coerce') / scalingVolume).astype(float)
     FGInit_tb['SKU_Number'] = FGInit_tb['SKU_Number'].astype(str)
     FGInit_tb = pnd.DataFrame(FGInit_tb)
     if modelGrpLevel == 'Yes':
