@@ -1,0 +1,31 @@
+name: Deploy Streamlit App
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            bash -l -c '
+              cd ~/ric-bgtool-streamlit
+              git pull
+              cp Solver.py /home/vmgbdeyo/RIC-BGO-Tool/Solver.py
+              sudo docker build -t ric-bgo-streamlit .
+              sudo docker stop bgo-streamlit || true
+              sudo docker rm my-custom-container || true
+              sudo docker run -d --name bgo-streamlit -p 8501:8501 -v /home/vmgbdeyo/RIC-BGO-Tool/excelFiles/solved:/app/../RIC-BGO-Tool/excelFiles/solved ric-bgo-streamlit
+            '
