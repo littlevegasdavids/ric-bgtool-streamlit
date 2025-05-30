@@ -455,8 +455,11 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        CmDem_tb.iloc[:,1:CmDem_tb.shape[1]] = CmDem_tb.iloc[:,1:CmDem_tb.shape[1]] / scalingVolume
+        cols_to_modify = CmDem_tb.columns[1:]
 
+        numeric_cols = CmDem_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+
+        CmDem_tb[numeric_cols] = CmDem_tb[numeric_cols].astype("float64") / scalingVolume
     CmDem_tb_temp = CmDem_tb.copy(deep=True)
 
     for periodName in cpReporting_data['Include in Report Period']:
@@ -573,15 +576,8 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        #print(WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]])
-        #WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]] = WIPInit_tb.iloc[:,1:WIPInit_tb.shape[1]].astype(float) / scalingVolume
-        # Get all columns from column index 1 onward
         cols_to_modify = WIPInit_tb.columns[1:]
-
-        # Select the numeric columns only
         numeric_cols = WIPInit_tb[cols_to_modify].select_dtypes(include=["number"]).columns
-
-        # Explicitly cast to float64 before assignment to prevent dtype issues
         WIPInit_tb[numeric_cols] = WIPInit_tb[numeric_cols].astype("float64") / scalingVolume
     WIPInit_tb['SKU_Number'] = WIPInit_tb['SKU_Number'].astype(str)
     WIPInit_tb = pnd.DataFrame(WIPInit_tb)
@@ -634,16 +630,9 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        #PdCap_tb.iloc[:,1:PdCap_tb.shape[1]] = PdCap_tb.iloc[:,1:PdCap_tb.shape[1]].astype(float) / scalingVolume
-        # Get all columns from column index 1 onward
         cols_to_modify = PdCap_tb.columns[1:]
-
-        # Select the numeric columns only
         numeric_cols = PdCap_tb[cols_to_modify].select_dtypes(include=["number"]).columns
-
-        # Explicitly cast to float64 before assignment to prevent dtype issues
         PdCap_tb[numeric_cols] = PdCap_tb[numeric_cols].astype("float64") / scalingVolume
-
     PdCap_data = pnd.DataFrame(PdCap_tb).groupby('Site').apply(lambda x: x.set_index('Stream').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(PdCap_data)
@@ -672,7 +661,11 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        PdCst_tb.iloc[:,1:PdCst_tb.shape[1]] = PdCst_tb.iloc[:,1:PdCst_tb.shape[1]] * scalingVolume / scalingCost
+        cols_to_modify = PdCst_tb.columns[1:]
+
+        numeric_cols = PdCst_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+
+        PdCst_tb[numeric_cols] = PdCst_tb[numeric_cols].astype("float64") * scalingVolume / scalingCost
     PdCst_data = pnd.DataFrame(PdCst_tb).groupby('Site').apply(lambda x: x.set_index('Stream').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(PdCst_data)
@@ -681,7 +674,9 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        PkCap_tb.iloc[:,1:PkCap_tb.shape[1]] = PkCap_tb.iloc[:,1:PkCap_tb.shape[1]].astype(float) / scalingVolume
+        cols_to_modify = PkCap_tb.columns[1:]
+        numeric_cols = PkCap_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+        PkCap_tb[numeric_cols] = PkCap_tb[numeric_cols].astype("float64") / scalingVolume
     PkCap_data = pnd.DataFrame(PkCap_tb).groupby('Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(PkCap_data)
@@ -718,7 +713,9 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        PkCst_tb.iloc[:,1:PkCst_tb.shape[1]] = PkCst_tb.iloc[:,1:PkCst_tb.shape[1]] * scalingVolume / scalingCost
+        cols_to_modify = PkCst_tb.columns[1:]
+        numeric_cols = PkCst_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+        PkCst_tb[numeric_cols] = PkCst_tb[numeric_cols].astype("float64") * scalingVolume / scalingCost
     PkCst_data = pnd.DataFrame(PkCst_tb).groupby('Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(PkCst_data)
@@ -740,7 +737,9 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        rPkCap_tb.iloc[:,1:rPkCap_tb.shape[1]] = rPkCap_tb.iloc[:,1:rPkCap_tb.shape[1]].astype(float) / scalingVolume
+        cols_to_modify = rPkCap_tb.columns[1:]
+        numeric_cols = rPkCap_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+        rPkCap_tb[numeric_cols] = rPkCap_tb[numeric_cols].astype("float64") / scalingVolume
     rPkCap_data = pnd.DataFrame(rPkCap_tb).groupby('Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
 
     if modelGrpLevel == 'No':
@@ -770,7 +769,9 @@ for itn in range(itnNumber):
 
 
     if enableScaling == 'Yes':
-        rPkCst_tb.iloc[:,1:rPkCst_tb.shape[1]] = rPkCst_tb.iloc[:,1:rPkCst_tb.shape[1]] * scalingVolume / scalingCost
+        cols_to_modify = rPkCst_tb.columns[1:]
+        numeric_cols = rPkCst_tb[cols_to_modify].select_dtypes(include=["number"]).columns
+        rPkCst_tb[numeric_cols] = rPkCst_tb[numeric_cols].astype("float64") * scalingVolume / scalingCost
     rPkCst_data = pnd.DataFrame(rPkCst_tb).groupby('Site').apply(lambda x: x.set_index('Line').to_dict(orient='index')).to_dict()
     if modelGrpLevel == 'No':
         expandGrpSKU(rPkCst_data)
