@@ -297,7 +297,13 @@ def comparison_page():
     scenario_list['Concatenated SC ID'] = scenario_list['id'].astype(str) + " - " + scenario_list['scenario_code'].astype(str)
     scenario_list = scenario_list.sort_values(by="id", ascending=False)
 
-    comparisonDF = {'Headers': ['Scenario Code:',
+    pd_sites = pd.read_sql_query('SELECT DISTINCT h4 FROM public."Summary" WHERE h2=%s AND h3=%s AND h5=%s;', dbConnection, params=['Utilization', 'Pd', 'Total'])
+    pk_sites = pd.read_sql_query('SELECT DISTINCT h4 FROM public."Summary" WHERE h2=%s AND h3=%s AND h5=%s;',dbConnection, params=['Utilization', 'Pk', 'Total'])
+    rpk_sites = pd.read_sql_query('SELECT DISTINCT h4 FROM public."Summary" WHERE h2=%s AND h3=%s AND h5=%s;',dbConnection, params=['Utilization', 'rPk', 'Total'])
+    store_sites = pd.read_sql_query('SELECT DISTINCT h4 FROM public."Summary" WHERE h2=%s AND h3=%s AND h5=%s;',dbConnection, params=['Utilization', 'WIP/FG', 'Total'])
+
+    if "comparisonDF" not in st.session_state:
+        comparisonDF = {'Headers': ['Scenario Code:',
                                 'Volume',
                                 'Periods',
                                 'Min Batch?',
@@ -306,14 +312,7 @@ def comparison_page():
                                 'Req. Sales (M, Cases)',
                                 'Actual Sales (M, Cases)',
                                 'Total Packed (M, Cases)',
-                                'Internal cs Co-Man (Pack)',
                                 'Outbound Miles / Shipment',
-                                '',
-                                'Total COGS (M)',
-                                'Total Indirect COGS (M)',
-                                'Total COGS / Cs',
-                                'Total Direct COGS / Cs',
-                                'Total Indirect COGS / Cs',
                                 '',
                                 'Total Direct COGS (Var, M)',
                                 'Manufacturing (Pd)',
@@ -326,10 +325,6 @@ def comparison_page():
                                 'Freight (Pk_Wip)',
                                 'Freight (WIP_rPk)',
                                 '',
-                                'Total Direct COGS (Fxd, M)',
-                                'Fixed Costs',
-                                'Other Non Fixed Adj',
-                                '',
                                 'Total Indirect COGS (Var, M)',
                                 'Handling',
                                 'Storage',
@@ -341,24 +336,25 @@ def comparison_page():
                                 'Freight (FG_Cm)',
                                 'Loads_SF (FG_Cm)',
                                 'Dunnage',
-                                'Other',
-                                '',
-                                'Total Indirect COGS (Fxd, M)',
-                                'Fixed Storage & Handling',
-                                'Other fixed',
-                                'Other Non Fixed Adj',
-                                '',
-                                '',
-                                'Pk Qty (M Cases/Yr)',
-                                '',
-                                'Avg. Pd Utilization (Hrs)',
-                                'Avg. Pk Utilization (Hrs)',
-                                'Avg. rPk Utilization (Hrs)',
-                                '',
-                                'Avg. Storage Utilization (WIP and/or FG, Cs)',
-                                'Max Storage Utilization (WIP and/or FG, Cs)',
                                 '',
                                 ]}
+        # <editor-fold desc="Add Sites to Comparison Df">
+        comparisonDF['Headers'].append('Pk Qty (M Cases/Yr)')
+        comparisonDF['Headers'].extend(['PkQ_' + str(site) for site in pk_sites['h4'].tolist()])
+
+        comparisonDF['Headers'].append('Avg. Pd Utilization (Hrs)')
+        comparisonDF['Headers'].extend(['PdU_' + str(site) for site in pd_sites['h4'].tolist()])
+
+        comparisonDF['Headers'].append('Avg. Pk Utilization (Hrs)')
+        comparisonDF['Headers'].extend(['PkU_' + str(site) for site in pk_sites['h4'].tolist()])
+
+        comparisonDF['Headers'].append('Avg. rPk Utilization (Hrs)')
+        comparisonDF['Headers'].extend(['rPkU_' + str(site) for site in rpk_sites['h4'].tolist()])
+
+        comparisonDF['Headers'].append('Avg. Storage Utilization (WIP|FG, Cs)')
+        comparisonDF['Headers'].extend(['StoreU_' + str(site) for site in store_sites['h4'].tolist()])
+        # </editor-fold>
+        st.session_state.comparisonDF = pd.DataFrame.from_dict(comparisonDF).set_index('Headers')
 
     if "chosen_comparison_scenarios" not in st.session_state:
         st.session_state['chosen_comparison_scenarios'] = []
@@ -376,59 +372,55 @@ def comparison_page():
                 chosen_scenario_summary = pd.read_sql_query('SELECT * FROM public."Summary" WHERE scenario_id = %s;', dbConnection, params=[chosen_scenario_id])
                 chosen_scenario_model = pd.read_sql_query('SELECT * FROM public."Model" WHERE scenario_id = %s;', dbConnection, params=[chosen_scenario_id])
                 if not chosen_scenario_summary.empty:
-                    # <editor-fold desc="Get all Comparison info and add it to the Table">
-                    comparisonDF[chosen_scenario_id]['Scenario Code:'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Scenario Code', 'H2'].values[0]
-                    comparisonDF[chosen_scenario_id]['Volume'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Demand Notes', 'H2'].values[0]
-                    comparisonDF[chosen_scenario_id]['Periods'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Period Notes', 'H2'].values[0]
-                    comparisonDF[chosen_scenario_id]['Min Batch?'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Period Notes', 'H2'].values[0]
-                    comparisonDF[chosen_scenario_id]['Min Load?'] = chosen_scenario_model.loc[chosen_scenario_model['H1'] == 'Period Notes', 'H2'].values[0]
-                    comparisonDF[chosen_scenario_id]['Req. Sales (M, Cases)'] = chosen_scenario_summary[(chosen_scenario_summary['H1'] == "Volume") &(chosen_scenario_summary['H2'] == "Demand") &(chosen_scenario_summary['H3'] == "Required") &(chosen_scenario_summary['H4'] == "Total")]["Report Total"].sum()
-                    comparisonDF[chosen_scenario_id]['Actual Sales (M, Cases)'] = chosen_scenario_summary[(chosen_scenario_summary['H1'] == "Volume") &(chosen_scenario_summary['H2'] == "Demand") &(chosen_scenario_summary['H3'] == "Delivered") &(chosen_scenario_summary['H4'] == "Total")]["Report Total"].sum()
-                    comparisonDF[chosen_scenario_id]['Total Packed (M, Cases)'] = chosen_scenario_summary[(chosen_scenario_summary['H1'] == "Volume") &(chosen_scenario_summary['H2'] == "Quantity") &(chosen_scenario_summary['H3'] == "Pk")]["Report Total"].sum()
-                    comparisonDF[chosen_scenario_id]['Internal cs Co-Man (Pack)'] = "x/y"
-                    comparisonDF[chosen_scenario_id]['Outbound Miles / Shipment'] = ""
-                    comparisonDF[chosen_scenario_id]['Total COGS (M)'] = 12222222222222222
-                    comparisonDF[chosen_scenario_id]['Total Indirect COGS (M)'] = 1
-                    comparisonDF[chosen_scenario_id]['Total COGS / Cs'] = 1
-                    comparisonDF[chosen_scenario_id]['Total Direct COGS / Cs'] = 1
-                    comparisonDF[chosen_scenario_id]['Total Indirect COGS / Cs'] = 1
-                    comparisonDF[chosen_scenario_id]['Total Direct COGS (Var, M)'] = 1
-                    comparisonDF[chosen_scenario_id]['Manufacturing (Pd)'] = 1
-                    comparisonDF[chosen_scenario_id]['Manufacturing (Pk)'] = 1
-                    comparisonDF[chosen_scenario_id]['Manufacturing (rPk)'] = 1
-                    comparisonDF[chosen_scenario_id]['Co-Man Penalties (Pd)'] = 1
-                    comparisonDF[chosen_scenario_id]['Co-Man Penalties (Pk)'] = 1
-                    comparisonDF[chosen_scenario_id]['Co-Man Penalties (rPk)'] = 1
-                    comparisonDF[chosen_scenario_id]['Freight (SUBS Total)'] = 1
-                    comparisonDF[chosen_scenario_id]['Freight (Pk_Wip)'] = 1
-                    comparisonDF[chosen_scenario_id]['Freight (WIP_rPk)'] = 1
-                    comparisonDF[chosen_scenario_id]['Total Direct COGS (Fxd, M)'] = 1
-                    comparisonDF[chosen_scenario_id]['Fixed Costs'] = 1
-                    comparisonDF[chosen_scenario_id]['Other Non Fixed Adj'] = 1
-                    comparisonDF[chosen_scenario_id]['Total Indirect COGS (Var, M)'] = 1
-                    comparisonDF[chosen_scenario_id]['Handling'] = 1
-                    comparisonDF[chosen_scenario_id]['Storage'] = 1
-                    comparisonDF[chosen_scenario_id]['Intercompany Freight (Inter GFB, VP, NVP - TOTAL)'] = 1
-                    comparisonDF[chosen_scenario_id]['Freight (Pd_Pk)'] = 1
-                    comparisonDF[chosen_scenario_id]['Freight (Pk_FG)'] = 1
-                    comparisonDF[chosen_scenario_id]['Freight (rPk_FG)'] = 1
-                    comparisonDF[chosen_scenario_id]['Outbound Freight (VP, NVP - TOTAL)'] = 1
-                    comparisonDF[chosen_scenario_id]['Freight (FG_Cm)'] = 1
-                    comparisonDF[chosen_scenario_id]['Loads_SF (FG_Cm)'] = 1
-                    comparisonDF[chosen_scenario_id]['Dunnage'] = 1
-                    comparisonDF[chosen_scenario_id]['Other'] = 1
-                    comparisonDF[chosen_scenario_id]['Total Indirect COGS (Fxd, M)'] = 1
-                    comparisonDF[chosen_scenario_id]['Fixed Storage & Handling'] = 1
-                    comparisonDF[chosen_scenario_id]['Other fixed'] = 1
-                    comparisonDF[chosen_scenario_id]['Other Non Fixed Adj'] = 1
-                    comparisonDF[chosen_scenario_id]['Pk Qty (M Cases/Yr)'] = 1
-                    comparisonDF[chosen_scenario_id]['Avg. Pd Utilization (Hrs)'] = 1
-                    comparisonDF[chosen_scenario_id]['Avg. Pk Utilization (Hrs)'] = 1
-                    comparisonDF[chosen_scenario_id]['Avg. rPk Utilization (Hrs)'] = 1
-                    comparisonDF[chosen_scenario_id]['Avg. Storage Utilization (WIP and/or FG, Cs)'] = 1
-                    comparisonDF[chosen_scenario_id]['Max Storage Utilization (WIP and/or FG, Cs)'] = 1
-                    # </editor-fold>
                     st.session_state['chosen_comparison_scenarios'].append(chosen_scenario_id)
+                    # <editor-fold desc="Get all Comparison info and add it to the Table">
+                    st.session_state.comparisonDF[chosen_scenario_id] = None
+                    st.session_state.comparisonDF.loc["Scenario Code:", chosen_scenario_id] = chosen_scenario_model.loc[chosen_scenario_model['h1'] == 'Scenario Code', 'h2'].values[0]
+                    st.session_state.comparisonDF.loc['Volume', chosen_scenario_id] = chosen_scenario_model.loc[chosen_scenario_model['h1'] == 'Demand Notes', 'h2'].values[0]
+                    st.session_state.comparisonDF.loc['Periods', chosen_scenario_id] = chosen_scenario_model.loc[chosen_scenario_model['h1'] == 'Period Notes', 'h2'].values[0]
+                    st.session_state.comparisonDF.loc['Min Batch?', chosen_scenario_id] = chosen_scenario_model.loc[chosen_scenario_model['h1'] == 'Enable Min Batch Size', 'h2'].values[0]
+                    st.session_state.comparisonDF.loc['Min Load?', chosen_scenario_id] = chosen_scenario_model.loc[chosen_scenario_model['h1'] == 'Enable Route Load Constraint', 'h2'].values[0]
+                    st.session_state.comparisonDF.loc['Req. Sales (M, Cases)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Volume") &(chosen_scenario_summary['h2'] == "Demand") &(chosen_scenario_summary['h3'] == "Required") &(chosen_scenario_summary['h4'] == "Total")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Actual Sales (M, Cases)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Volume") &(chosen_scenario_summary['h2'] == "Demand") &(chosen_scenario_summary['h3'] == "Delivered") &(chosen_scenario_summary['h4'] == "Total")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Total Packed (M, Cases)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Volume") &(chosen_scenario_summary['h2'] == "Quantity") &(chosen_scenario_summary['h3'] == "Pk")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Outbound Miles / Shipment', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "KPI") &(chosen_scenario_summary['h2'] == "Avg. Miles/Load") &(chosen_scenario_summary['h3'] == "FG_Cm") &(chosen_scenario_summary['h4'] == "Total")]["report_total"].sum(),1)
+                    st.session_state.comparisonDF.loc['Total Direct COGS (Var, M)', chosen_scenario_id] = round((chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Manufacturing") &(chosen_scenario_summary['h3'] == "Pd")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Manufacturing") &(chosen_scenario_summary['h3'] == "Pk")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Manufacturing") &(chosen_scenario_summary['h3'] == "rPk")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Co-Man Penalties") &(chosen_scenario_summary['h3'] == "Pd")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Co-Man Penalties") &(chosen_scenario_summary['h3'] == "Pk")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Co-Man Penalties") &(chosen_scenario_summary['h3'] == "rPk")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "Pk_WIP")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "WIP_rPk")]["report_total"].sum())/1000000,1)
+                    st.session_state.comparisonDF.loc['Manufacturing (Pd)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Manufacturing") &(chosen_scenario_summary['h3'] == "Pd")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Manufacturing (Pk)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Manufacturing") &(chosen_scenario_summary['h3'] == "Pk")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Manufacturing (rPk)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Manufacturing") &(chosen_scenario_summary['h3'] == "rPk")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Co-Man Penalties (Pd)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Co-Man Penalties") &(chosen_scenario_summary['h3'] == "Pd")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Co-Man Penalties (Pk)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Co-Man Penalties") &(chosen_scenario_summary['h3'] == "Pk")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Co-Man Penalties (rPk)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Co-Man Penalties") &(chosen_scenario_summary['h3'] == "rPk")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Freight (SUBS Total)', chosen_scenario_id] = round((chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "Pk_WIP")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "WIP_rPk")]["report_total"].sum())/1000000,1)
+                    st.session_state.comparisonDF.loc['Freight (Pk_Wip)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "Pk_WIP")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Freight (WIP_rPk)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "WIP_rPk")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Total Indirect COGS (Var, M)', chosen_scenario_id] = round((chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'].isin(["Handling", "Storage"]))]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'].isin(["Pd_Pk", "Pk_FG", "rPk_FG"]))]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "FG_Cm")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Loads SF")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Dunnage")]["report_total"].sum()) / 1000000,1)
+                    st.session_state.comparisonDF.loc['Handling', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Handling")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Storage', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Storage")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Intercompany Freight (Inter GFB, VP, NVP - TOTAL)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'].isin(["Pd_Pk", "Pk_FG", "rPk_FG"]))]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Freight (Pd_Pk)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "Pd_Pk")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Freight (Pk_FG)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "Pk_FG")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Freight (rPk_FG)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "rPk_FG")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Outbound Freight (VP, NVP - TOTAL)', chosen_scenario_id] = round((chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "FG_Cm")]["report_total"].sum() + chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Loads SF")]["report_total"].sum())/1000000,1)
+                    st.session_state.comparisonDF.loc['Freight (FG_Cm)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Freight") &(chosen_scenario_summary['h3'] == "FG_Cm")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Loads_SF (FG_Cm)', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Loads SF")]["report_total"].sum()/1000000,1)
+                    st.session_state.comparisonDF.loc['Dunnage', chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Cost") &(chosen_scenario_summary['h2'] == "Dunnage")]["report_total"].sum()/1000000,1)
+                    # </editor-fold>
+                    # <editor-fold desc="Add the Site Volumes and Utilization to the Comparison Table">
+                    for site in pk_sites['h4'].tolist():
+                        st.session_state.comparisonDF.loc['PkQ_'+site, chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Volume") &(chosen_scenario_summary['h2'] == "Quantity") &(chosen_scenario_summary['h3'] == "Pk") &(chosen_scenario_summary['h4'] == site)]["total"].sum()/1000000,1)
+                        st.session_state.comparisonDF.loc['PkU_' + site, chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Hours") &(chosen_scenario_summary['h2'] == "Utilization") &(chosen_scenario_summary['h3'] == "Pk") &(chosen_scenario_summary['h4'] == site) &(chosen_scenario_summary['h5'] == 'Total')]["total"].sum(),1)
+
+                    for site in pd_sites['h4'].tolist():
+                        st.session_state.comparisonDF.loc['PdU_'+site, chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Hours") &(chosen_scenario_summary['h2'] == "Utilization") &(chosen_scenario_summary['h3'] == "Pd") &(chosen_scenario_summary['h4'] == site) &(chosen_scenario_summary['h5'] == 'Total')]["total"].sum(),1)
+
+                    for site in rpk_sites['h4'].tolist():
+                        st.session_state.comparisonDF.loc['rPkU_'+site, chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Hours") &(chosen_scenario_summary['h2'] == "Utilization") &(chosen_scenario_summary['h3'] == "rPk") &(chosen_scenario_summary['h4'] == site) &(chosen_scenario_summary['h5'] == 'Total')]["total"].sum(),1)
+
+                    for site in store_sites['h4'].tolist():
+                        st.session_state.comparisonDF.loc['StoreU_'+site, chosen_scenario_id] = round(chosen_scenario_summary[(chosen_scenario_summary['h1'] == "Volume") &(chosen_scenario_summary['h2'] == "Utilization") &(chosen_scenario_summary['h3'] == "WIP/FG") &(chosen_scenario_summary['h4'] == site) &(chosen_scenario_summary['h5'] == 'Total')]["total"].sum(),1)
+
+                    # </editor-fold>
                     st.success(f"Successfully added Scenario '{chosen_scenario}' to the Comparison!")
                 else:
                     st.warning(f"Sorry, scenario '{chosen_scenario}' is old and cannot be added to the Comparison at this time")
@@ -436,13 +428,7 @@ def comparison_page():
                 st.warning(f"Warning! Scenario '{chosen_scenario}' is already in the list")
     # </editor-fold>
 
-    #chosen_comparison_scenarios_Tuple = tuple(st.session_state['chosen_comparison_scenarios'])
-    #st.write(chosen_comparison_scenarios_Tuple)
-    #st.write(st.session_state['chosen_comparison_scenarios'])
-    st.dataframe(comparisonDF)
-
-    #for numSc in chosen_comparison_scenarios_Tuple:
-
+    st.dataframe(st.session_state.comparisonDF, use_container_width=True, column_config={"Header": st.column_config.Column(pinned=True)},)
 
 
 # <editor-fold desc="Page Navigation">
