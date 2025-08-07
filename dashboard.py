@@ -178,10 +178,10 @@ def manufacturing_page():
     else:
         filtered_df_manuq = df_manuq[df_manuq["period"].isin(period) & df_manuq["child_sku_group"].isin(childSkuGroup) & df_manuq["parent_sku_group"].isin(parentSkuGroup)]
 
-    category_df_manuq = filtered_df_manuq.groupby(by=[siteType], as_index=False)[unitType].sum()
-    category_df_manuq2 = filtered_df_manuq.groupby(by=["period"], as_index=False)[unitType].sum()
-    category_df_manuq3 = filtered_df_manuq.groupby(by=["child_sku_group"], as_index=False)[unitType].sum()
-    category_df_manuq4 = filtered_df_manuq.pivot_table(index='sku_group', columns=siteType, values=unitType, aggfunc='sum')
+    category_df_manuq = round(filtered_df_manuq.groupby(by=[siteType], as_index=False)[unitType].sum(),0)
+    category_df_manuq2 = round(filtered_df_manuq.groupby(by=["period"], as_index=False)[unitType].sum(),0)
+    category_df_manuq3 = round(filtered_df_manuq.groupby(by=["child_sku_group"], as_index=False)[unitType].sum(),0)
+    category_df_manuq4 = round(filtered_df_manuq.pivot_table(index='sku_group', columns=siteType, values=unitType, aggfunc='sum'),0)
     # </editor-fold>
     # <editor-fold desc="Display Graphs">
     col1, col2 = st.columns(2)
