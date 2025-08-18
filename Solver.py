@@ -3182,7 +3182,10 @@ if __name__ == '__main__':
         for FG in FGCap_data:
             totAvail = FGCap_data[FG]["Ph1"]["Total_Storage"] * scalingVolume
             totUsage = dictVolQty['FG', FG, 'Total', period]
-            dictVolUtil['FG', FG, 'Total', period] = totUsage / totAvail * 100
+            try:
+                dictVolUtil['FG', FG, 'Total', period] = totUsage / totAvail * 100
+            except ZeroDivisionError:
+                dictVolUtil['FG', FG, 'Total', period] = 0
 
             dictVolUtilMP['FG', FG, 'Avail', 'Total'] += totAvail
             dictVolUtilMP['FG', FG, 'Usage', 'Total'] += totUsage
@@ -3192,7 +3195,10 @@ if __name__ == '__main__':
         for WIP in WIPCap_data:
             totAvail = WIPCap_data[WIP]["Ph1"]["Total_Storage"] * scalingVolume
             totUsage = dictVolQty['WIP', WIP, 'Total', period]
-            dictVolUtil['WIP', WIP, 'Total', period] = totUsage / totAvail * 100
+            try:
+                dictVolUtil['WIP', WIP, 'Total', period] = totUsage / totAvail * 100
+            except ZeroDivisionError:
+                dictVolUtil['WIP', WIP, 'Total', period] = 0
 
             dictVolUtilMP['WIP', WIP, 'Avail', 'Total'] += totAvail
             dictVolUtilMP['WIP', WIP, 'Usage', 'Total'] += totUsage
@@ -3203,7 +3209,10 @@ if __name__ == '__main__':
                 sharedSite = WIPSiteType_data[WIP][Ph]['Shared_FG_Site']
                 if pnd.notna(sharedSite) and sharedSite != 'None':
                     totCombiUsage = (dictVolQty['WIP', WIP, 'Total', period] + dictVolQty['FG', sharedSite, 'Total', period])
-                    dictVolUtil['WIP/FG', WIP+'/'+sharedSite, 'Total', period] = totCombiUsage / totAvail * 100
+                    try:
+                        dictVolUtil['WIP/FG', WIP+'/'+sharedSite, 'Total', period] = totCombiUsage / totAvail * 100
+                    except ZeroDivisionError:
+                        dictVolUtil['WIP/FG', WIP + '/' + sharedSite, 'Total', period] = 0
 
 
                     if ('WIP/FG', WIP+'/'+sharedSite, 'Avail', 'Total') not in dictVolUtilMP:
