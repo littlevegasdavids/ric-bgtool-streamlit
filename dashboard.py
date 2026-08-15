@@ -53,13 +53,29 @@ else:
 
 # <editor-fold desc="Configuration">
 warnings.filterwarnings('ignore')
-st.set_page_config(page_title="BGO Dashboard", page_icon=":chart_with_upwards_trend:", layout="wide")
+# initial_sidebar_state: the page navigation lives in the sidebar, and with the
+# default ("auto") Streamlit collapses it on narrower viewports -- so the app
+# could open with no visible way to change page.
+st.set_page_config(page_title="BGO Dashboard", page_icon=":chart_with_upwards_trend:", layout="wide",
+                   initial_sidebar_state="expanded")
+
+# Plotly defaults, set once here rather than repeated on every px.* call.
+# "seaborn" is a grey-background template that fought the light page; plotly_white
+# matches it. The colour sequence is the RIC palette shared with the BGO Tool.
+px.defaults.template = "plotly_white"
+px.defaults.color_discrete_sequence = ["#C94900", "#018D87", "#3A84CA", "#E8A127", "#269E5F", "#6B7480"]
 # </editor-fold>
 
 # <editor-fold desc="Import CSS Styles and Create Page Title">
 with open(stylePath) as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-st.html(f'<div class= "pageTitle"><img class="logo" align ="left" src={ricLogoPath}>BGO Scenario Dashboard<img class="logo" align="right" src={mabLogoPath}></div')
+st.html(
+    f'<div class="pageTitle">'
+    f'<img class="logo" src="{ricLogoPath}" alt="RIC">'
+    f'<span class="pageTitleText">BGO Scenario Dashboard</span>'
+    f'<img class="logo" src="{mabLogoPath}" alt="The Mark Anthony Group of Companies">'
+    f'</div>'
+)
 st.divider()
 # </editor-fold>
 
@@ -186,11 +202,11 @@ def manufacturing_page():
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Quantity per Site")
-        fig = px.bar(category_df_manuq, x=siteType, y=unitType, template="seaborn",height=250)
+        fig = px.bar(category_df_manuq, x=siteType, y=unitType, height=250)
         st.plotly_chart(fig,use_container_width=True)
     with col2:
         st.subheader("Quantity per Period")
-        fig = px.line(category_df_manuq2, x="period", y=unitType, template="seaborn",height=250)
+        fig = px.line(category_df_manuq2, x="period", y=unitType, height=250)
         st.plotly_chart(fig,use_container_width=True)
 
     col5, col6 = st.columns((2,4),gap='small')
@@ -218,6 +234,7 @@ def distribution_page():
     df_FgCm = pd.merge(df_FgCm, df_ZipMaster, left_on='fg_warehouse', right_on='BGO Code')
     df_FgCm.rename(columns={'ZIP': 'FromZIP'}, inplace=True)
     df_FgCm.drop(['BGO Code'], axis=1, inplace=True)
+    df_FgCm['FromZIP'] = df_FgCm['FromZIP'].astype(str)
     df_FgCm['FromZIP'] = df_FgCm['FromZIP'].apply(lambda x: x.zfill(5))
 
     df_FgCm = pd.merge(df_FgCm, df_ZipMaster, left_on='distributor', right_on='BGO Code')
@@ -439,5 +456,19 @@ pages = {
 }
 page = st.sidebar.radio("Select a page", pages.keys())
 pages[page]()
+# </editor-fold>
+
+# <editor-fold desc="Footer">
+# Rendered after the page body so it sits at the foot of whichever page is
+# showing. rel="noopener noreferrer" is not optional on a target="_blank" link:
+# without it the opened tab gets a handle on this one through window.opener.
+st.html(
+    f'<div class="appFooter">'
+    f'<img class="footerLogo" src="{ricLogoPath}" alt="RIC">'
+    f'<span class="footerCredit">Co-created by '
+    f'<a href="https://rdavi.dev" target="_blank" rel="noopener noreferrer">rdavi.dev</a>'
+    f'</span>'
+    f'</div>'
+)
 # </editor-fold>
 dbConnection.close()

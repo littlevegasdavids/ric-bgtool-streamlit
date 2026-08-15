@@ -1,120 +1,396 @@
-.pageTitle{
-    background-color: #FFFFFF;
-    justify-content: centre;
-    border-radius: 20px;
-    color:#000000;
-    font-size: 30px;
-    text-align: center;
-    width: 100%;
-    height: 100px;
+/* BGO Scenario Dashboard -- custom styling.
+ *
+ * Injected by dashboard.py, wrapped in a style tag at runtime.
+ *
+ * NOTE: never write a literal closing style tag anywhere in this file, even
+ * inside a comment -- the HTML parser closes the block on that string and dumps
+ * the rest of the stylesheet onto the page as visible text.
+ *
+ * SCOPE: this file styles (a) the three custom classes dashboard.py emits via
+ * st.html -- .pageTitle, .logo, .infoCard -- and (b) Streamlit's own widgets,
+ * addressed through their stable `data-testid` hooks rather than the generated
+ * `st-ae st-af ...` emotion classes, which change between Streamlit versions.
+ * Selectors here were read off the live DOM of streamlit 1.42.2.
+ *
+ * Base colours (page, text, primary, card) come from .streamlit/config.toml,
+ * NOT from here -- that file is what makes the app render the same for every
+ * viewer. Palette matches the sibling RIC-BGO-Tool / RIC-Dev-Tool front ends.
+ */
+
+:root {
+  --ric-orange: #c94900; /* primary; AA-safe under white text */
+  --ric-orange-soft: rgba(201, 73, 0, 0.08);
+  --ric-page: #f8f9fa;
+  --ric-surface: #ffffff;
+  --ric-line: #e7eaed; /* hairline borders */
+  --ric-text: #1b222b;
+  --ric-muted: #6b7480;
+  --ric-radius: 12px;
+  --ric-radius-sm: 8px;
 }
 
-.logo{
-    height: 95%;
-    padding: 10px 20px 10px 20px; /* top, right, bottom, left */
+/* ---------------------------------------------------------------- chrome -- */
+
+/* Streamlit's pink gradient strip and the "Deploy" button are dev chrome. This
+   dashboard is opened from the BGO Tool as a finished report, so both are
+   noise. The ⋮ menu is deliberately kept -- it holds Rerun and Print. */
+[data-testid="stDecoration"],
+[data-testid="stAppDeployButton"] {
+  display: none;
 }
 
-.infoCard{
-    background-color: #E8E8E8;
-    color: #5E5656;
-    font-size: 12px;
-    border: 1px solid #DCDCDC;
-    padding: 2% 2% 2% 2%;
-    border-radius: 10px;
-}
-.infoCardHeading{
-    color: #000000;
-    font-size: 18px;
-}
-.infoCardText{
-    text-indent: 10%;
-    color: #FF7A00;
-    font-size: 15px;
+[data-testid="stHeader"] {
+  background: transparent;
 }
 
-.infoCard2{
-    background-color: #E8E8E8;
-    color: #5E5656;
-    font-size: 12px;
-    border: 1px solid #8FA7A8;
-    padding: 2% 2% 2% 2%;
-    border-radius: 5px;
-}
-.infoCardHeading2{
-    color: #122B85;
-    font-size: 16px;
-}
-.infoCardText2{
-    text-indent: 10%;
-    color: #177BDE;
-    font-size: 12px;
+[data-testid="stMainBlockContainer"] {
+  padding-top: 2.5rem;
+  padding-bottom: 4rem;
+  max-width: 1400px;
 }
 
-/* Radio */
-input[type="radio"] + div {
-    background: #63ADD2 !important;
-    color: #FFFFFF;
-    border-radius: 20px !important;
-    padding: 8px 18px !important;
+/* --------------------------------------------------------------- banner --- */
+
+/* Was a fixed height:100px block with the two logos floated via the deprecated
+   align="left"/"right" attributes, which left the title off-centre whenever the
+   logos differed in width. Flexbox centres the title on the BANNER rather than
+   between its neighbours, and the logos keep their own aspect ratio. */
+.pageTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background-color: var(--ric-surface);
+  border: 1px solid var(--ric-line);
+  border-radius: var(--ric-radius);
+  padding: 14px 24px;
+  width: 100%;
 }
-input[type="radio"] + div p {
-    font-size: 12px;
+
+.pageTitleText {
+  flex: 1;
+  text-align: center;
+  color: var(--ric-text);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
-input[type="radio"][tabindex="0"] + div {
-    background: #E6FF4D !important;
-    border-radius: 20px !important;
-    color: #17455C !important;
+
+/* Height-driven so both marks share an optical baseline; width follows their
+   own aspect ratios (RIC is 801x467, Mark Anthony 278x77, so the second renders
+   roughly twice as wide at the same height). 52px is the smallest size at which
+   the RIC tagline stays legible. */
+.logo {
+  height: 52px;
+  width: auto;
+  max-width: 230px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
-input[type="radio"][tabindex="0"] + div p {
-    font-size: 15px;
-    color: #17455C !important;
+
+/* ---------------------------------------------------------------- cards --- */
+
+/* KPI / info cards. The HTML these style is unchanged in dashboard.py:
+   <div class="infoCard"><p class="infoCardHeading">..</p><p class="infoCardText">..</p></div>
+   Was mid-grey (#E8E8E8) on a light page, which read as "disabled" rather than
+   "card". Now a white surface with a hairline, matching the sibling apps. */
+/* Columns default to top-aligned content of independent heights, so a card
+   whose value wraps to two lines ends up taller than its neighbours. Stretching
+   the row lets `height: 100%` below equalise them. */
+[data-testid="stHorizontalBlock"] {
+  align-items: stretch;
 }
-div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p {
-    font-size: 20px;
+
+.infoCard,
+.infoCard2 {
+  background-color: var(--ric-surface);
+  border: 1px solid var(--ric-line);
+  border-radius: var(--ric-radius);
+  padding: 16px 18px;
+  height: 100%;
+  transition: border-color 0.15s ease;
 }
+
+.infoCard:hover,
+.infoCard2:hover {
+  border-color: rgba(27, 34, 43, 0.18);
 }
+
+.infoCardHeading,
+.infoCardHeading2 {
+  color: var(--ric-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 6px 0;
+}
+
+/* text-indent:10% is gone -- it pushed each value a different distance from the
+   left depending on the card's width, so the three cards never lined up. */
+.infoCardText,
+.infoCardText2 {
+  color: var(--ric-orange);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  text-indent: 0;
+  word-break: break-word;
+}
+
+/* -------------------------------------------------------------- sidebar --- */
+
+[data-testid="stSidebar"] {
+  background-color: var(--ric-surface);
+  border-right: 1px solid var(--ric-line);
+}
+
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ric-muted);
+}
+
+/* Page navigation: radio inputs skinned as pills.
+   Same interaction as before -- only the colours change. The old scheme was a
+   saturated blue (#63ADD2) for every inactive page and neon yellow-green
+   (#E6FF4D) for the active one, which read as a warning rather than a
+   selection. */
+[data-testid="stSidebar"] div[role="radiogroup"] {
+  gap: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide the actual radio dot; the pill itself carries the selected state. */
 div[role="radiogroup"] label > div:first-child {
-    display: none !important;
+  display: none !important;
 }
+
 div[role="radiogroup"] label {
-    margin-right: 0px !important;
-}
-div[role="radiogroup"] {
-    gap: 20px;
+  margin-right: 0 !important;
+  width: 100%;
 }
 
-
-/* Select Box */
-.stSelectbox>label{
-    background-color: #00B7C2;
-    position: absolute;
-    left: 0%;
-    padding: 0.31rem;
-    border-bottom-left-radius: 4px;
-    border-top-left-radius: 4px;
-    z-index:1;
-    min-width: 5.5rem;
-    height: 100%;
-    text-align: center;
-    font-size: 25px;;
-}
-.stSelectbox>div>div>div>div{
-    padding: 0rem;
-    max-width: 80%;
-    font-size: 20px;
-}
-.stSelectbox>div>div>div:first-child{
-    padding: 0rem;
-    max-width: 80%;
-    margin-left: 15rem;
-    font-size: 20px;
-}
-.stSelectbox>div>div{
-    padding: 0rem;
-    font-size: 25px;
-}
-.stSelectbox>div>div:hover{
-    border: 2px solid #00B7C2;
+/* `input + div` is the label's text container -- see the DOM:
+   <label><div>dot</div><input type=radio><div>text</div></label> */
+input[type="radio"] + div {
+  background: transparent !important;
+  border-radius: var(--ric-radius-sm) !important;
+  padding: 8px 12px !important;
+  width: 100%;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
+input[type="radio"] + div p {
+  font-size: 14px !important;
+  color: var(--ric-text) !important;
+  font-weight: 500;
+}
 
+input[type="radio"]:hover + div {
+  background: rgba(27, 34, 43, 0.05) !important;
+}
+
+/* :checked rather than the old [tabindex="0"] trick -- same element, but this
+   says what it means and does not depend on how Streamlit manages focus. */
+input[type="radio"]:checked + div {
+  background: var(--ric-orange) !important;
+}
+
+input[type="radio"]:checked + div p {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------- inputs --- */
+
+/* The selectbox label used to be absolutely positioned (left:0, height:100%) as
+   a solid teal block overlapping the control, with the value pushed clear of it
+   by a hardcoded `margin-left: 15rem`. That only lined up at one window width.
+   It is a normal label above a normal control now. */
+.stSelectbox > label,
+.stMultiSelect > label,
+[data-testid="stWidgetLabel"] p {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ric-muted);
+}
+
+.stSelectbox [data-baseweb="select"] > div,
+.stMultiSelect [data-baseweb="select"] > div {
+  background-color: var(--ric-surface);
+  border-color: var(--ric-line);
+  border-radius: var(--ric-radius-sm);
+  font-size: 14px;
+}
+
+.stSelectbox [data-baseweb="select"] > div:hover,
+.stMultiSelect [data-baseweb="select"] > div:hover {
+  border-color: var(--ric-orange);
+}
+
+/* Selected values in a multiselect. */
+.stMultiSelect [data-baseweb="tag"] {
+  background-color: var(--ric-orange) !important;
+  border-radius: 6px !important;
+}
+
+/* -------------------------------------------------------------- buttons --- */
+
+.stButton > button,
+.stFormSubmitButton > button {
+  border-radius: var(--ric-radius-sm);
+  border: 1px solid var(--ric-orange);
+  background-color: var(--ric-orange);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0.4rem 1rem;
+  transition: filter 0.15s ease;
+}
+
+.stButton > button:hover,
+.stFormSubmitButton > button:hover {
+  filter: brightness(0.92);
+  border-color: var(--ric-orange);
+  color: #ffffff;
+}
+
+/* ------------------------------------------------------- tables & charts -- */
+
+[data-testid="stTable"],
+[data-testid="stDataFrame"] {
+  border: 1px solid var(--ric-line);
+  border-radius: var(--ric-radius);
+  overflow: hidden;
+}
+
+[data-testid="stTable"] table {
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+[data-testid="stTable"] thead th {
+  background-color: var(--ric-page);
+  color: var(--ric-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--ric-line);
+}
+
+[data-testid="stTable"] tbody tr:hover td {
+  background-color: rgba(27, 34, 43, 0.03);
+}
+
+[data-testid="stTable"] td,
+[data-testid="stTable"] th {
+  border-color: var(--ric-line) !important;
+}
+
+/* Charts sit on the page rather than in a card: a border around every plot
+   competes with the axes. They get breathing room instead. */
+[data-testid="stPlotlyChart"],
+[data-testid="stDeckGlJsonChart"],
+[data-testid="stVegaLiteChart"] {
+  border-radius: var(--ric-radius);
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------- typography */
+
+[data-testid="stHeading"] h2,
+[data-testid="stHeading"] h3 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ric-text);
+  padding-top: 0.5rem;
+}
+
+hr {
+  border-color: var(--ric-line);
+}
+
+/* Tab strip (Pd / Pk / Rpk on the main page). */
+.stTabs [data-baseweb="tab-list"] {
+  gap: 4px;
+  border-bottom: 1px solid var(--ric-line);
+}
+
+.stTabs [data-baseweb="tab"] {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ric-muted);
+}
+
+.stTabs [aria-selected="true"] {
+  color: var(--ric-orange) !important;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------- messages - */
+
+/* Success / warning callouts on the Comparison page, and the traceback block
+   Streamlit renders on an uncaught exception. Given the same hairline-card
+   treatment as everything else, so a failure looks handled rather than raw. */
+[data-testid="stAlert"],
+[data-testid="stException"] {
+  border-radius: var(--ric-radius);
+  border: 1px solid var(--ric-line);
+}
+
+[data-testid="stException"] {
+  background-color: var(--ric-surface);
+}
+
+/* --------------------------------------------------------------- footer --- */
+
+.appFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ric-line);
+}
+
+.footerLogo {
+  height: 22px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.7;
+}
+
+.footerCredit {
+  font-size: 12px;
+  color: var(--ric-muted);
+}
+
+.footerCredit a {
+  color: var(--ric-orange);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footerCredit a:hover {
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------- focus ring --- */
+
+/* One visible focus treatment for keyboard users across every control. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ric-orange);
+  outline-offset: 2px;
+}

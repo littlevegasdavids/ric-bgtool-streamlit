@@ -1,0 +1,42 @@
+# Streamlit theme for the BGO Scenario Dashboard.
+#
+# WHY THIS FILE LIVES HERE
+# There used to be a config.toml at the REPO ROOT with a [theme] block in it.
+# Streamlit never read it. It only ever loads theme config from
+# ./.streamlit/config.toml (project) or ~/.streamlit/config.toml (global), so
+# the root file had no effect from the day it was added.
+#
+# The visible symptom: with no theme configured, Streamlit falls back to the
+# viewer's browser `prefers-color-scheme`. The dashboard therefore rendered DARK
+# for anyone on a dark OS and LIGHT for everyone else, while style.css was
+# written for a light background -- which is why the white logo banner and the
+# pale info cards looked broken on some machines and fine on others.
+#
+# `base` is pinned below so every viewer now sees the same app.
+#
+# Colours are the same tokens the sibling RIC-BGO-Tool and RIC-Dev-Tool front
+# ends use (their public/theme.css), converted from oklch to hex because TOML
+# theme values must be plain hex. Keep them in step with those files.
+
+[theme]
+base = "light"
+
+# RIC orange. Slightly darker than the logo's #F26722: white text on the logo
+# orange only reaches 4.19:1, and Streamlit paints white labels on primaryColor
+# for buttons and selected controls. This value clears WCAG AA at 4.73:1.
+primaryColor = "#C94900"
+
+backgroundColor = "#F8F9FA"          # page  (--b2)
+secondaryBackgroundColor = "#FFFFFF" # cards, sidebar, table headers (--b1)
+textColor = "#1B222B"                # body text (--bc)
+
+font = "sans serif"
+
+[server]
+# The dashboard is opened from the BGO Tool with ?id=<scenario_id> and shows one
+# scenario's results. Nothing here is user-writable, so the upload limit only
+# needs to cover the solved workbook read from disk.
+maxUploadSize = 50
+
+[browser]
+gatherUsageStats = false
